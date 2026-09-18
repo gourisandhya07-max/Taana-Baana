@@ -1,13 +1,13 @@
 // Supabase Client with Hybrid Mock Data Engine for Taana Baana
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://mock-taana-baana.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'mock-anon-key';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://noyrfotqdzwnalbnmbcu.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_owxWgT3liD0TTwl7Z3TkwQ_7-bV1dJz';
 
 export const isRealSupabaseConfigured = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && 
-  import.meta.env.VITE_SUPABASE_ANON_KEY &&
-  !import.meta.env.VITE_SUPABASE_URL.includes('mock')
+  SUPABASE_URL && 
+  SUPABASE_ANON_KEY &&
+  !SUPABASE_URL.includes('mock')
 );
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -191,8 +191,12 @@ function setLocalData(key, val) {
 export const api = {
   async getArtisans() {
     if (isRealSupabaseConfigured) {
-      const { data, error } = await supabase.from('artisans').select('*');
-      if (!error && data?.length) return data;
+      try {
+        const { data, error } = await supabase.from('artisans').select('*');
+        if (!error && data?.length) return data;
+      } catch (err) {
+        console.warn('Supabase getArtisans notice, falling back:', err);
+      }
     }
     return getLocalData(STORAGE_KEYS.ARTISANS, MOCK_ARTISANS);
   },
@@ -204,11 +208,15 @@ export const api = {
 
   async getProducts(filters = {}) {
     if (isRealSupabaseConfigured) {
-      let query = supabase.from('products').select('*');
-      if (filters.status) query = query.eq('status', filters.status);
-      if (filters.category) query = query.eq('category', filters.category);
-      const { data, error } = await query;
-      if (!error && data?.length) return data;
+      try {
+        let query = supabase.from('products').select('*');
+        if (filters.status) query = query.eq('status', filters.status);
+        if (filters.category && filters.category !== 'All Crafts') query = query.eq('category', filters.category);
+        const { data, error } = await query;
+        if (!error && data?.length) return data;
+      } catch (err) {
+        console.warn('Supabase getProducts notice, falling back:', err);
+      }
     }
     
     let items = getLocalData(STORAGE_KEYS.PRODUCTS, MOCK_PRODUCTS);
@@ -248,8 +256,12 @@ export const api = {
     };
     
     if (isRealSupabaseConfigured) {
-      const { data, error } = await supabase.from('products').insert([newProduct]).select();
-      if (!error && data?.[0]) return data[0];
+      try {
+        const { data, error } = await supabase.from('products').insert([newProduct]).select();
+        if (!error && data?.[0]) return data[0];
+      } catch (err) {
+        console.warn('Supabase addProduct notice:', err);
+      }
     }
 
     const current = getLocalData(STORAGE_KEYS.PRODUCTS, MOCK_PRODUCTS);
@@ -267,8 +279,12 @@ export const api = {
     };
 
     if (isRealSupabaseConfigured) {
-      const { data } = await supabase.from('orders').insert([newOrder]).select();
-      if (data?.[0]) return data[0];
+      try {
+        const { data } = await supabase.from('orders').insert([newOrder]).select();
+        if (data?.[0]) return data[0];
+      } catch (err) {
+        console.warn('Supabase addOrderInquiry notice:', err);
+      }
     }
 
     const current = getLocalData(STORAGE_KEYS.ORDERS, MOCK_ORDERS);
@@ -278,14 +294,23 @@ export const api = {
 
   async getOrders(artisanId) {
     if (isRealSupabaseConfigured) {
-      const { data } = await supabase.from('orders').select('*').eq('artisan_id', artisanId);
-      if (data) return data;
+      try {
+        const { data, error } = await supabase.from('orders').select('*').eq('artisan_id', artisanId);
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase getOrders notice:', err);
+      }
     }
     const current = getLocalData(STORAGE_KEYS.ORDERS, MOCK_ORDERS);
     return artisanId ? current.filter(o => o.artisan_id === artisanId) : current;
   },
 
   async recordProductView(productId) {
+    if (isRealSupabaseConfigured) {
+      try {
+        await supabase.from('product_views').insert([{ product_id: productId }]);
+      } catch (err) {}
+    }
     const views = getLocalData(STORAGE_KEYS.VIEWS, []);
     views.push({ id: "view_" + Date.now(), product_id: productId, viewed_at: new Date().toISOString() });
     setLocalData(STORAGE_KEYS.VIEWS, views);

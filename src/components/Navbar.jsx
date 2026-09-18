@@ -90,7 +90,7 @@ export default function Navbar({
               backgroundColor: userMode === 'artisan' ? '#FAF2DF' : '#EBF0F3',
               borderColor: userMode === 'artisan' ? '#D9A441' : '#5C6B73'
             }}
-            title="Toggle between Artisan Portal and Customer Marketplace view"
+            title={t.modeToggleTooltip}
           >
             <Sparkles size={14} color={userMode === 'artisan' ? '#D9A441' : '#5C6B73'} />
             <span>{userMode === 'artisan' ? t.switchArtisan : t.switchBuyer}</span>
@@ -100,7 +100,7 @@ export default function Navbar({
           <LanguageSelector currentLang={currentLang} onSelectLang={onSelectLang} />
 
           {/* Cart / Inquiry Counter */}
-          <button style={styles.cartBtn} onClick={onOpenCart} title="View Inquiries">
+          <button style={styles.cartBtn} onClick={onOpenCart} title={t.inquiriesTooltip}>
             <ShoppingBag size={18} color="#3B2A1E" />
             {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
           </button>

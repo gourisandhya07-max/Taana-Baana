@@ -42,8 +42,8 @@ export default function PriceSuggestionCard({
           <Calculator size={22} color="#C1602C" />
         </div>
         <div>
-          <h3 style={styles.title}>AI Pricing Assistant</h3>
-          <p style={styles.subtitle}>Fair wage calculation & market benchmark intelligence</p>
+          <h3 style={styles.title}>{t.aiPricingAssistant}</h3>
+          <p style={styles.subtitle}>{t.aiPricingSub}</p>
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export default function PriceSuggestionCard({
       {/* Cost Breakdown Visual Bar */}
       <div style={styles.costBreakdownBox}>
         <div style={styles.breakdownHeader}>
-          <span style={styles.breakdownTitle}>Calculated Cost Floor:</span>
+          <span style={styles.breakdownTitle}>{t.calculatedCostFloor}</span>
           <span style={styles.costTotal}>
             ₹{(Number(matCost || 0) + Number(hours || 0) * hourlyWage).toLocaleString('en-IN')}
           </span>
@@ -87,7 +87,7 @@ export default function PriceSuggestionCard({
               width: `${(matCost / (matCost + hours * hourlyWage)) * 100}%`,
               backgroundColor: '#C1602C'
             }}
-            title="Material Cost"
+            title={t.materials}
           />
           <div
             style={{
@@ -95,12 +95,12 @@ export default function PriceSuggestionCard({
               flex: 1,
               backgroundColor: '#7C8A5A'
             }}
-            title="Artisan Labor Wage (₹150/hr)"
+            title={t.fairWage}
           />
         </div>
         <div style={styles.barLegend}>
-          <span style={{ color: '#C1602C' }}>● Materials: ₹{matCost}</span>
-          <span style={{ color: '#5C693E' }}>● Fair Wage: ₹{hours * hourlyWage}</span>
+          <span style={{ color: '#C1602C' }}>● {t.materials}: ₹{matCost}</span>
+          <span style={{ color: '#5C693E' }}>● {t.fairWage}: ₹{hours * hourlyWage}</span>
         </div>
       </div>
 
@@ -114,7 +114,7 @@ export default function PriceSuggestionCard({
           ₹{suggestedMin.toLocaleString('en-IN')} – ₹{suggestedMax.toLocaleString('en-IN')}
         </div>
         <p style={styles.rationaleText}>
-          <strong>{t.priceRationaleTitle}</strong> Based on {hours} hours of skilled craftwork, ₹{matCost} yarn/raw inputs, and comparable fair-trade market sales data.
+          <strong>{t.priceRationaleTitle}</strong> {t.priceRationaleDesc}
         </p>
 
         {/* Quick Apply Buttons */}
@@ -128,7 +128,7 @@ export default function PriceSuggestionCard({
               color: customPrice === suggestedMin ? '#FFFFFF' : '#3B2A1E'
             }}
           >
-            Competitive: ₹{suggestedMin}
+            {t.competitive} ₹{suggestedMin}
           </button>
 
           <button
@@ -140,7 +140,7 @@ export default function PriceSuggestionCard({
               color: customPrice === Math.round((suggestedMin + suggestedMax) / 2) ? '#FFFFFF' : '#3B2A1E'
             }}
           >
-            Recommended: ₹{Math.round((suggestedMin + suggestedMax) / 2)}
+            {t.recommended} ₹{Math.round((suggestedMin + suggestedMax) / 2)}
           </button>
 
           <button
@@ -152,14 +152,14 @@ export default function PriceSuggestionCard({
               color: customPrice === suggestedMax ? '#FFFFFF' : '#3B2A1E'
             }}
           >
-            Premium: ₹{suggestedMax}
+            {t.premium} ₹{suggestedMax}
           </button>
         </div>
       </div>
 
       {/* Final Price Input */}
       <div style={styles.finalInputBox}>
-        <label style={styles.finalLabel}>Set Final Listing Price (₹):</label>
+        <label style={styles.finalLabel}>{t.setFinalPrice}</label>
         <div style={styles.finalInputRow}>
           <input
             type="number"
@@ -175,7 +175,7 @@ export default function PriceSuggestionCard({
             onClick={() => onApplyPrice?.(customPrice, suggestedMin, suggestedMax)}
             style={styles.confirmBtn}
           >
-            <Check size={16} /> Confirm Price
+            <Check size={16} /> {t.confirmPrice}
           </button>
         </div>
       </div>

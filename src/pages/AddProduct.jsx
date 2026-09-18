@@ -129,8 +129,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 1: Photo Upload + AI Smart Vision */}
       {step === 1 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepPhoto}: Smart AI Photo Analysis</h2>
-          <p style={styles.subtitle}>Upload a photo of your craft. Gemini AI will auto-detect category, pattern, and title.</p>
+          <h2 style={styles.title}>{t.stepPhoto}: {t.step1Heading}</h2>
+          <p style={styles.subtitle}>{t.step1Sub}</p>
 
           <div style={styles.uploadArea}>
             {imageUrl ? (
@@ -151,7 +151,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
                   }}
                 >
                   <Wand2 size={16} />
-                  <span>{isEnhanced ? 'Enhanced (Lighting Boosted)' : 'Auto-Enhance Photo'}</span>
+                  <span>{isEnhanced ? t.enhanced : t.autoEnhance}</span>
                 </button>
               </div>
             ) : (
@@ -160,10 +160,10 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
                 <p style={styles.uploadPrompt}>{t.photoUploadPrompt}</p>
                 <div style={styles.presetButtons}>
                   <button onClick={() => handlePhotoSelect(0)} style={styles.presetBtn}>
-                    📸 Demo Photo 1 (Kasavu Saree)
+                    {t.demoPhoto1}
                   </button>
                   <button onClick={() => handlePhotoSelect(1)} style={styles.presetBtn}>
-                    📸 Demo Photo 2 (Terracotta Pitcher)
+                    {t.demoPhoto2}
                   </button>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           {isAnalyzing && (
             <div style={styles.aiAnalyzingBox}>
               <Sparkles size={20} color="#D9A441" />
-              <span>Gemini AI is analyzing craft pattern, yarn quality, and origin...</span>
+              <span>{t.aiAnalyzing}</span>
             </div>
           )}
 
@@ -182,7 +182,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
             <div style={styles.aiResultForm}>
               <div style={styles.aiTagBadge}>
                 <Sparkles size={14} color="#D9A441" />
-                <span>Gemini AI Generated — Review & Edit</span>
+                <span>{t.aiGeneratedReview}</span>
               </div>
 
               <div style={styles.fieldGroup}>
@@ -196,17 +196,17 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
               </div>
 
               <div style={styles.fieldGroup}>
-                <label style={styles.label}>Craft Category</label>
+                <label style={styles.label}>{t.craftCategory}</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   style={styles.select}
                 >
-                  <option value="Weaving">Weaving & Sarees</option>
-                  <option value="Pottery">Pottery & Clay</option>
-                  <option value="Woodwork">Woodwork & Toys</option>
-                  <option value="Metalwork">Dhokra & Metal</option>
-                  <option value="Embroidery">Needlework & Embroidery</option>
+                  <option value="Weaving">{t.catWeaving}</option>
+                  <option value="Pottery">{t.catPottery}</option>
+                  <option value="Woodwork">{t.catWoodwork}</option>
+                  <option value="Metalwork">{t.catMetalwork}</option>
+                  <option value="Embroidery">{t.catEmbroidery}</option>
                 </select>
               </div>
 
@@ -215,7 +215,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
                 className="btn btn-primary btn-large-touch"
                 style={{ width: '100%', marginTop: '16px' }}
               >
-                Approve & Proceed to Voice Details ➔
+                {t.approveAndProceedVoice}
               </button>
             </div>
           )}
@@ -225,8 +225,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 2: Voice & Story Input */}
       {step === 2 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepVoice}: Live Voice Recording</h2>
-          <p style={styles.subtitle}>Speak in Malayalam, Hindi, or English to record your exact voice story.</p>
+          <h2 style={styles.title}>{t.stepVoice}: {t.step2Heading}</h2>
+          <p style={styles.subtitle}>{t.step2Sub}</p>
 
           <VoiceRecorder
             lang={currentLang}
@@ -234,19 +234,19 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           />
 
           <div style={{ ...styles.fieldGroup, marginTop: '20px' }}>
-            <label style={styles.label}>{t.aiDescSuggested}</label>
+            <label style={styles.label}>{t.aiDescSuggested || "Product Description"}</label>
             <textarea
               rows="4"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe yarn source, weaving technique, or cultural significance..."
+              placeholder={t.storyPlaceholder}
               style={styles.textarea}
             />
           </div>
 
           <div style={styles.btnRow}>
-            <button onClick={() => setStep(1)} className="btn btn-outline">Back</button>
-            <button onClick={() => setStep(3)} className="btn btn-primary">Proceed to Smart Pricing ➔</button>
+            <button onClick={() => setStep(1)} className="btn btn-outline">{t.back}</button>
+            <button onClick={() => setStep(3)} className="btn btn-primary">{t.proceedPricing}</button>
           </div>
         </div>
       )}
@@ -254,8 +254,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 3: Smart Pricing Assistant */}
       {step === 3 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepPrice}: AI-Assisted Pricing Assistant</h2>
-          <p style={styles.subtitle}>Ensure fair artisan wages while remaining competitive in target markets.</p>
+          <h2 style={styles.title}>{t.stepPrice}: {t.step3Heading}</h2>
+          <p style={styles.subtitle}>{t.step3Sub}</p>
 
           <PriceSuggestionCard
             materialCost={materialCost}
@@ -269,8 +269,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           />
 
           <div style={{ ...styles.btnRow, marginTop: '24px' }}>
-            <button onClick={() => setStep(2)} className="btn btn-outline">Back</button>
-            <button onClick={() => setStep(4)} className="btn btn-primary">Proceed to Market Linkage Analysis ➔</button>
+            <button onClick={() => setStep(2)} className="btn btn-outline">{t.back}</button>
+            <button onClick={() => setStep(4)} className="btn btn-primary">{t.proceedLinkage}</button>
           </div>
         </div>
       )}
@@ -278,8 +278,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 4: AI Market Linkage Engine Preview & Publish */}
       {step === 4 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepMatch}: AI Market Linkage Inspector</h2>
-          <p style={styles.subtitle}>Review recommended market channels before publishing to the marketplace.</p>
+          <h2 style={styles.title}>{t.stepMatch}: {t.step4Heading}</h2>
+          <p style={styles.subtitle}>{t.step4Sub}</p>
 
           <MarketMatchPanel
             product={{
@@ -291,17 +291,18 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
               region: artisan?.region || 'Kerala',
               tags
             }}
+            lang={currentLang}
           />
 
           <div style={{ ...styles.btnRow, marginTop: '24px' }}>
-            <button onClick={() => setStep(3)} className="btn btn-outline">Back</button>
+            <button onClick={() => setStep(3)} className="btn btn-outline">{t.back}</button>
             <button
               onClick={handlePublish}
               className="btn btn-gold btn-large-touch"
               style={{ flex: 1 }}
             >
               <Check size={20} />
-              <span>Confirm & Publish Craft to Marketplace</span>
+              <span>{t.confirmPublish}</span>
             </button>
           </div>
         </div>

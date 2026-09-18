@@ -1,7 +1,10 @@
 import React from 'react';
 import { TrendingUp, Eye, ShoppingCart, DollarSign, Award } from 'lucide-react';
+import { translations } from '../lib/translations';
 
-export default function DashboardChart({ stats }) {
+export default function DashboardChart({ stats, lang = 'en' }) {
+  const t = translations[lang] || translations.en;
+
   const {
     totalProducts = 4,
     totalViews = 384,
@@ -9,14 +12,22 @@ export default function DashboardChart({ stats }) {
     totalRevenue = 47400
   } = stats || {};
 
-  // Sample monthly inquiry trends data
+  // Localized months
+  const monthNames = {
+    en: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+    ml: ['ഒക്ടോ', 'നവം', 'ഡിസം', 'ജനു', 'ഫെബ്രു', 'മാർച്ച്'],
+    hi: ['अक्टू', 'नव', 'दिस', 'जन', 'फ़र', 'मार्च']
+  };
+
+  const months = monthNames[lang] || monthNames.en;
+
   const monthlyData = [
-    { month: 'Oct', views: 45, orders: 1 },
-    { month: 'Nov', views: 82, orders: 3 },
-    { month: 'Dec', views: 120, orders: 4 },
-    { month: 'Jan', views: 95, orders: 2 },
-    { month: 'Feb', views: 140, orders: 5 },
-    { month: 'Mar', views: 180, orders: 7 }
+    { month: months[0], views: 45, orders: 1 },
+    { month: months[1], views: 82, orders: 3 },
+    { month: months[2], views: 120, orders: 4 },
+    { month: months[3], views: 95, orders: 2 },
+    { month: months[4], views: 140, orders: 5 },
+    { month: months[5], views: 180, orders: 7 }
   ];
 
   const maxViews = Math.max(...monthlyData.map(d => d.views));
@@ -30,7 +41,7 @@ export default function DashboardChart({ stats }) {
             <Award size={22} color="#C1602C" />
           </div>
           <div>
-            <span style={styles.statLabel}>Total Crafts</span>
+            <span style={styles.statLabel}>{t.totalCrafts}</span>
             <h3 style={styles.statValue}>{totalProducts}</h3>
           </div>
         </div>
@@ -40,7 +51,7 @@ export default function DashboardChart({ stats }) {
             <Eye size={22} color="#7C8A5A" />
           </div>
           <div>
-            <span style={styles.statLabel}>Total Product Views</span>
+            <span style={styles.statLabel}>{t.totalViews}</span>
             <h3 style={styles.statValue}>{totalViews.toLocaleString('en-IN')}</h3>
           </div>
         </div>
@@ -50,7 +61,7 @@ export default function DashboardChart({ stats }) {
             <ShoppingCart size={22} color="#5C6B73" />
           </div>
           <div>
-            <span style={styles.statLabel}>Active Inquiries</span>
+            <span style={styles.statLabel}>{t.activeInquiries}</span>
             <h3 style={styles.statValue}>{totalOrders}</h3>
           </div>
         </div>
@@ -60,7 +71,7 @@ export default function DashboardChart({ stats }) {
             <DollarSign size={22} color="#D9A441" />
           </div>
           <div>
-            <span style={styles.statLabel}>Est. Sales Revenue</span>
+            <span style={styles.statLabel}>{t.estRevenue}</span>
             <h3 style={styles.statValue}>₹{totalRevenue.toLocaleString('en-IN')}</h3>
           </div>
         </div>
@@ -70,12 +81,12 @@ export default function DashboardChart({ stats }) {
       <div style={styles.chartCard}>
         <div style={styles.chartHeader}>
           <div>
-            <h4 style={styles.chartTitle}>Monthly Buyer Interest & Inquiry Growth</h4>
-            <p style={styles.chartSubtitle}>Track how your products perform across market segments</p>
+            <h4 style={styles.chartTitle}>{t.chartTitle}</h4>
+            <p style={styles.chartSubtitle}>{t.chartSubtitle}</p>
           </div>
           <div style={styles.growthBadge}>
             <TrendingUp size={16} color="#7C8A5A" />
-            <span>+38% vs last month</span>
+            <span>{t.chartGrowth}</span>
           </div>
         </div>
 
@@ -86,8 +97,8 @@ export default function DashboardChart({ stats }) {
             return (
               <div key={i} style={styles.barCol}>
                 <div style={styles.barTooltip}>
-                  <span>{d.views} views</span>
-                  <strong>{d.orders} orders</strong>
+                  <span>{d.views} {t.totalViews?.split(' ')[1] || 'views'}</span>
+                  <strong>{d.orders} {t.activeInquiries?.split(' ')[0] || 'orders'}</strong>
                 </div>
 
                 <div style={styles.barTrack}>
@@ -112,64 +123,68 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px'
+    gap: '24px'
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '16px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '20px'
   },
   statCard: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '16px',
-    padding: '18px',
+    borderRadius: '18px',
+    padding: '20px 22px',
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
-    boxShadow: '0 2px 8px rgba(59, 42, 30, 0.04)'
+    gap: '16px',
+    boxShadow: '0 4px 16px rgba(59, 42, 30, 0.04)'
   },
   iconBox: {
-    width: '46px',
-    height: '46px',
-    borderRadius: '14px',
+    width: '50px',
+    height: '50px',
+    borderRadius: '16px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
   },
   statLabel: {
-    fontSize: '0.8rem',
+    fontSize: '0.85rem',
     color: '#6E5B4D',
-    fontWeight: '600'
+    fontWeight: '700'
   },
   statValue: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.6rem',
+    fontSize: '1.75rem',
     color: '#3B2A1E',
     fontWeight: '800',
-    lineHeight: '1.1'
+    lineHeight: '1.15',
+    marginTop: '2px'
   },
   chartCard: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '18px',
-    padding: '24px',
-    boxShadow: '0 4px 16px rgba(59, 42, 30, 0.05)'
+    borderRadius: '24px',
+    padding: '28px 32px',
+    boxShadow: '0 6px 20px rgba(59, 42, 30, 0.05)'
   },
   chartHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '24px'
+    marginBottom: '28px',
+    flexWrap: 'wrap',
+    gap: '12px'
   },
   chartTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.25rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.35rem',
     color: '#3B2A1E'
   },
   chartSubtitle: {
-    fontSize: '0.85rem',
-    color: '#6E5B4D'
+    fontSize: '0.9rem',
+    color: '#6E5B4D',
+    marginTop: '2px'
   },
   growthBadge: {
     display: 'flex',
@@ -177,18 +192,18 @@ const styles = {
     gap: '6px',
     backgroundColor: '#F0F3E8',
     color: '#5C693E',
-    padding: '6px 12px',
+    padding: '7px 14px',
     borderRadius: '20px',
-    fontSize: '0.82rem',
+    fontSize: '0.84rem',
     fontWeight: '700'
   },
   barsContainer: {
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    height: '180px',
-    gap: '12px',
-    paddingTop: '20px'
+    height: '200px',
+    gap: '14px',
+    paddingTop: '24px'
   },
   barCol: {
     flex: 1,
@@ -200,18 +215,19 @@ const styles = {
   },
   barTooltip: {
     position: 'absolute',
-    top: '-24px',
-    fontSize: '0.72rem',
+    top: '-26px',
+    fontSize: '0.74rem',
     color: '#6E5B4D',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    whiteSpace: 'nowrap'
   },
   barTrack: {
-    width: '28px',
+    width: '32px',
     height: '100%',
     backgroundColor: '#F8F3EA',
-    borderRadius: '14px',
+    borderRadius: '16px',
     display: 'flex',
     alignItems: 'flex-end',
     overflow: 'hidden'
@@ -219,13 +235,13 @@ const styles = {
   barFill: {
     width: '100%',
     background: 'linear-gradient(180deg, #C1602C 0%, #D9A441 100%)',
-    borderRadius: '14px',
+    borderRadius: '16px',
     transition: 'height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)'
   },
   monthLabel: {
-    marginTop: '8px',
-    fontSize: '0.8rem',
+    marginTop: '10px',
+    fontSize: '0.82rem',
     color: '#3B2A1E',
-    fontWeight: '600'
+    fontWeight: '700'
   }
 };

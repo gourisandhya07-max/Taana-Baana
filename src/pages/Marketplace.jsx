@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import CraftMap from '../components/CraftMap';
 import { api } from '../lib/supabaseClient';
-import { translations } from '../lib/translations';
-import { Search, Filter, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { translations, getLocalizedCategory, getLocalizedRegion, getLocalizedProduct } from '../lib/translations';
+import { Search, Sparkles } from 'lucide-react';
 
 const CRAFT_CATEGORIES = ['All Crafts', 'Weaving', 'Pottery', 'Woodwork', 'Metalwork', 'Embroidery'];
 const REGIONS = ['All Regions', 'Kerala', 'Rajasthan', 'Uttar Pradesh', 'Chhattisgarh', 'Kashmir'];
@@ -51,8 +51,8 @@ export default function Marketplace({
     <div style={styles.container}>
       {/* Search Header Banner */}
       <div style={styles.headerBanner}>
-        <h1 style={styles.heading}>Artisan Craft Marketplace</h1>
-        <p style={styles.subheading}>Buy authentic handlooms & heritage crafts directly from India's master artisans</p>
+        <h1 style={styles.heading}>{t.marketHeading}</h1>
+        <p style={styles.subheading}>{t.marketSubheading}</p>
 
         {/* Search Input Bar */}
         <div style={styles.searchBar}>
@@ -61,7 +61,7 @@ export default function Marketplace({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t.searchPlaceholder || "Search Kasavu sarees, terracotta pitchers, brass statues..."}
+            placeholder={t.searchPlaceholder}
             style={styles.searchInput}
           />
         </div>
@@ -84,7 +84,7 @@ export default function Marketplace({
                   borderColor: isSel ? '#C1602C' : '#E8D9C5'
                 }}
               >
-                {cat}
+                {getLocalizedCategory(cat, currentLang)}
               </button>
             );
           })}
@@ -98,7 +98,9 @@ export default function Marketplace({
             style={styles.select}
           >
             {REGIONS.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {getLocalizedRegion(r, currentLang)}
+              </option>
             ))}
           </select>
 
@@ -107,9 +109,9 @@ export default function Marketplace({
             onChange={(e) => setSortBy(e.target.value)}
             style={styles.select}
           >
-            <option value="featured">Featured Crafts</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
+            <option value="featured">{t.sortFeatured}</option>
+            <option value="price-low">{t.sortPriceLow}</option>
+            <option value="price-high">{t.sortPriceHigh}</option>
           </select>
         </div>
       </div>
@@ -117,6 +119,7 @@ export default function Marketplace({
       {/* Interactive Geography Map */}
       <CraftMap
         selectedRegion={selectedRegion}
+        currentLang={currentLang}
         onSelectRegion={(reg) => setSelectedRegion(reg)}
       />
 
@@ -124,8 +127,8 @@ export default function Marketplace({
       {products.length === 0 ? (
         <div style={styles.emptyState}>
           <Sparkles size={36} color="#C1602C" />
-          <h3 style={styles.emptyTitle}>No Crafts Match Your Criteria</h3>
-          <p style={styles.emptySub}>Try adjusting search term or state filter</p>
+          <h3 style={styles.emptyTitle}>{t.emptyTitle}</h3>
+          <p style={styles.emptySub}>{t.emptySub}</p>
           <button
             onClick={() => {
               setSearchTerm('');
@@ -133,22 +136,26 @@ export default function Marketplace({
               setSelectedRegion('All Regions');
             }}
             className="btn btn-outline"
-            style={{ marginTop: '12px' }}
+            style={{ marginTop: '16px' }}
           >
-            Reset Filters
+            {t.resetFilters}
           </button>
         </div>
       ) : (
         <div style={styles.grid}>
-          {products.map((prod) => (
-            <ProductCard
-              key={prod.id}
-              product={prod}
-              artisan={artisansMap.get(prod.artisan_id)}
-              onClick={() => onSelectProduct(prod)}
-              onSelectMarketMatch={onSelectMarketMatch}
-            />
-          ))}
+          {products.map((prod) => {
+            const localizedProd = getLocalizedProduct(prod, currentLang);
+            return (
+              <ProductCard
+                key={prod.id}
+                product={localizedProd}
+                artisan={artisansMap.get(prod.artisan_id)}
+                currentLang={currentLang}
+                onClick={() => onSelectProduct(localizedProd)}
+                onSelectMarketMatch={onSelectMarketMatch}
+              />
+            );
+          })}
         </div>
       )}
     </div>
@@ -159,34 +166,36 @@ const styles = {
   container: {
     maxWidth: '1280px',
     margin: '0 auto',
-    padding: '30px 24px 60px 24px'
+    padding: '40px 24px 80px 24px'
   },
   headerBanner: {
     textAlign: 'center',
-    marginBottom: '32px'
+    marginBottom: '36px'
   },
   heading: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '2.6rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '2.8rem',
     color: '#3B2A1E',
-    marginBottom: '6px'
+    marginBottom: '10px'
   },
   subheading: {
-    fontSize: '1.05rem',
+    fontSize: '1.1rem',
     color: '#6E5B4D',
-    marginBottom: '24px'
+    marginBottom: '28px',
+    maxWidth: '720px',
+    margin: '0 auto 28px auto'
   },
   searchBar: {
-    maxWidth: '640px',
+    maxWidth: '680px',
     margin: '0 auto',
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '14px',
     backgroundColor: '#FFFFFF',
     border: '2px solid #E8D9C5',
-    borderRadius: '30px',
-    padding: '10px 20px',
-    boxShadow: '0 4px 18px rgba(59, 42, 30, 0.06)'
+    borderRadius: '32px',
+    padding: '12px 24px',
+    boxShadow: '0 6px 20px rgba(59, 42, 30, 0.06)'
   },
   searchInput: {
     flex: 1,
@@ -202,7 +211,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: '16px',
-    marginBottom: '28px'
+    marginBottom: '32px'
   },
   pillGroup: {
     display: 'flex',
@@ -210,8 +219,8 @@ const styles = {
     gap: '8px'
   },
   filterPill: {
-    padding: '8px 16px',
-    borderRadius: '20px',
+    padding: '8px 18px',
+    borderRadius: '24px',
     border: '1px solid',
     fontSize: '0.88rem',
     fontWeight: '700',
@@ -220,37 +229,40 @@ const styles = {
   },
   dropdownGroup: {
     display: 'flex',
-    gap: '10px'
+    gap: '12px',
+    flexWrap: 'wrap'
   },
   select: {
-    padding: '8px 14px',
-    borderRadius: '12px',
+    padding: '9px 16px',
+    borderRadius: '14px',
     border: '1px solid #E8D9C5',
     backgroundColor: '#FFFFFF',
-    fontSize: '0.88rem',
+    fontSize: '0.9rem',
     fontWeight: '600',
-    color: '#3B2A1E'
+    color: '#3B2A1E',
+    outline: 'none'
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '24px'
+    gap: '28px'
   },
   emptyState: {
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: '70px 20px',
     backgroundColor: '#FFFFFF',
-    borderRadius: '20px',
+    borderRadius: '24px',
     border: '1px dashed #E8D9C5'
   },
   emptyTitle: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.4rem',
+    fontSize: '1.5rem',
     color: '#3B2A1E',
-    marginTop: '12px'
+    marginTop: '16px'
   },
   emptySub: {
-    fontSize: '0.9rem',
-    color: '#6E5B4D'
+    fontSize: '0.95rem',
+    color: '#6E5B4D',
+    marginTop: '6px'
   }
 };

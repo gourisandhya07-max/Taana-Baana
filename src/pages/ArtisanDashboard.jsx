@@ -2,17 +2,21 @@ import React, { useState, useEffect } from 'react';
 import DashboardChart from '../components/DashboardChart';
 import MarketMatchPanel from '../components/MarketMatchPanel';
 import { api } from '../lib/supabaseClient';
-import { PlusCircle, Eye, ShoppingBag, Sparkles, CheckCircle2, Clock, Layers, ArrowUpRight } from 'lucide-react';
+import { translations, getLocalizedProduct, getLocalizedCategory } from '../lib/translations';
+import { PlusCircle, ShoppingBag, Sparkles } from 'lucide-react';
 
 export default function ArtisanDashboard({
   artisan,
   onNavigate,
   onSelectProduct,
-  onSelectMarketMatch
+  onSelectMarketMatch,
+  currentLang = 'en'
 }) {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selectedProductForMatches, setSelectedProductForMatches] = useState(null);
+
+  const t = translations[currentLang] || translations.en;
 
   useEffect(() => {
     async function loadData() {
@@ -42,8 +46,8 @@ export default function ArtisanDashboard({
       {/* Dashboard Top Header */}
       <div style={styles.topHeader}>
         <div>
-          <span style={styles.welcomeTag}>ARTISAN CONTROL PANEL</span>
-          <h1 style={styles.title}>Welcome back, {artisan?.full_name || 'Devaki Amma'} 👋</h1>
+          <span style={styles.welcomeTag}>{t.artisanControlPanel}</span>
+          <h1 style={styles.title}>{t.welcomeBack} {artisan?.full_name || 'Devaki Amma'} 👋</h1>
           <p style={styles.subtitle}>{artisan?.region || 'Chendamangalam, Kerala'} • {artisan?.craft_type || 'Handloom Weaving'}</p>
         </div>
 
@@ -52,7 +56,7 @@ export default function ArtisanDashboard({
           className="btn btn-primary btn-large-touch"
         >
           <PlusCircle size={20} />
-          <span>Catalog New Craft</span>
+          <span>{t.catalogNewCraft}</span>
         </button>
       </div>
 
@@ -64,61 +68,67 @@ export default function ArtisanDashboard({
           totalOrders,
           totalRevenue
         }}
+        lang={currentLang}
       />
 
       {/* Inventory & Marketplace Status Manager */}
-      <section style={{ marginTop: '40px' }}>
+      <section style={{ marginTop: '48px' }}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>Your Listed Crafts ({products.length})</h2>
-          <span style={styles.liveTag}>● Live Supabase Storage Sync</span>
+          <h2 style={styles.sectionTitle}>{t.listedCrafts} ({products.length})</h2>
+          <span style={styles.liveTag}>{t.liveStorageSync}</span>
         </div>
 
         <div style={styles.productsList}>
-          {products.map((prod) => (
-            <div key={prod.id} style={styles.prodItemCard}>
-              <img
-                src={prod.image_urls?.[0]}
-                alt={prod.title}
-                style={styles.prodThumb}
-              />
-              <div style={styles.prodInfo}>
-                <span className="badge badge-terracotta">{prod.category}</span>
-                <h3 style={styles.prodTitle}>{prod.title}</h3>
-                <p style={styles.priceRow}>
-                  Listing Price: <strong>₹{Number(prod.final_price).toLocaleString('en-IN')}</strong>
-                </p>
-              </div>
+          {products.map((prod) => {
+            const localizedProd = getLocalizedProduct(prod, currentLang);
+            return (
+              <div key={prod.id} style={styles.prodItemCard}>
+                <img
+                  src={prod.image_urls?.[0]}
+                  alt={localizedProd.title}
+                  style={styles.prodThumb}
+                />
+                <div style={styles.prodInfo}>
+                  <span className="badge badge-terracotta">
+                    {getLocalizedCategory(localizedProd.category, currentLang)}
+                  </span>
+                  <h3 style={styles.prodTitle}>{localizedProd.title}</h3>
+                  <p style={styles.priceRow}>
+                    {t.listingPrice} <strong>₹{Number(prod.final_price).toLocaleString('en-IN')}</strong>
+                  </p>
+                </div>
 
-              <div style={styles.prodActions}>
-                <button
-                  onClick={() => setSelectedProductForMatches(prod)}
-                  style={{
-                    ...styles.actionBtn,
-                    backgroundColor: selectedProductForMatches?.id === prod.id ? '#FAF2DF' : '#FFFFFF',
-                    borderColor: selectedProductForMatches?.id === prod.id ? '#D9A441' : '#E8D9C5'
-                  }}
-                >
-                  <Sparkles size={16} color="#D9A441" />
-                  <span>Market Matches</span>
-                </button>
+                <div style={styles.prodActions}>
+                  <button
+                    onClick={() => setSelectedProductForMatches(localizedProd)}
+                    style={{
+                      ...styles.actionBtn,
+                      backgroundColor: selectedProductForMatches?.id === prod.id ? '#FAF2DF' : '#FFFFFF',
+                      borderColor: selectedProductForMatches?.id === prod.id ? '#D9A441' : '#E8D9C5'
+                    }}
+                  >
+                    <Sparkles size={16} color="#D9A441" />
+                    <span>{t.marketMatchesBtn}</span>
+                  </button>
 
-                <button
-                  onClick={() => onSelectProduct(prod)}
-                  className="btn btn-outline"
-                  style={{ padding: '6px 14px', fontSize: '0.85rem' }}
-                >
-                  View Detail ➔
-                </button>
+                  <button
+                    onClick={() => onSelectProduct(localizedProd)}
+                    className="btn btn-outline"
+                    style={{ padding: '8px 16px', fontSize: '0.88rem' }}
+                  >
+                    {t.viewDetail}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
       {/* Active Buyer Inquiries Table */}
-      <section style={{ marginTop: '40px' }}>
+      <section style={{ marginTop: '48px' }}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>Customer Orders & Inquiries ({orders.length})</h2>
+          <h2 style={styles.sectionTitle}>{t.customerOrdersTitle} ({orders.length})</h2>
         </div>
 
         <div style={styles.ordersList}>
@@ -135,7 +145,9 @@ export default function ArtisanDashboard({
                     {ord.status.toUpperCase()}
                   </span>
                 </div>
-                <p style={styles.orderContact}>Phone: {ord.customer_contact} • Email: {ord.customer_email || 'N/A'}</p>
+                <p style={styles.orderContact}>
+                  {t.phoneLabel} {ord.customer_contact} • {t.emailLabel} {ord.customer_email || 'N/A'}
+                </p>
                 {ord.notes && <p style={styles.orderNotes}>"{ord.notes}"</p>}
               </div>
             </div>
@@ -145,8 +157,8 @@ export default function ArtisanDashboard({
 
       {/* Selected Product Market Linkage Inspector */}
       {selectedProductForMatches && (
-        <section style={{ marginTop: '40px' }}>
-          <MarketMatchPanel product={selectedProductForMatches} />
+        <section style={{ marginTop: '48px' }}>
+          <MarketMatchPanel product={selectedProductForMatches} lang={currentLang} />
         </section>
       )}
     </div>
@@ -157,7 +169,7 @@ const styles = {
   container: {
     maxWidth: '1240px',
     margin: '0 auto',
-    padding: '30px 24px 60px 24px'
+    padding: '40px 24px 80px 24px'
   },
   topHeader: {
     display: 'flex',
@@ -165,58 +177,61 @@ const styles = {
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: '16px',
-    marginBottom: '32px'
+    marginBottom: '36px'
   },
   welcomeTag: {
-    fontSize: '0.75rem',
+    fontSize: '0.76rem',
     fontWeight: '800',
     color: '#C1602C',
     letterSpacing: '0.12em'
   },
   title: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '2.2rem',
-    color: '#3B2A1E'
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '2.4rem',
+    color: '#3B2A1E',
+    marginTop: '4px'
   },
   subtitle: {
-    fontSize: '0.95rem',
-    color: '#6E5B4D'
+    fontSize: '0.98rem',
+    color: '#6E5B4D',
+    marginTop: '2px'
   },
   sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '18px'
+    marginBottom: '20px'
   },
   sectionTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.6rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.7rem',
     color: '#3B2A1E'
   },
   liveTag: {
-    fontSize: '0.8rem',
+    fontSize: '0.82rem',
     fontWeight: '700',
     color: '#7C8A5A'
   },
   productsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '14px'
+    gap: '16px'
   },
   prodItemCard: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '16px',
-    padding: '16px',
+    borderRadius: '18px',
+    padding: '18px 20px',
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    flexWrap: 'wrap'
+    gap: '18px',
+    flexWrap: 'wrap',
+    boxShadow: '0 4px 14px rgba(59, 42, 30, 0.04)'
   },
   prodThumb: {
-    width: '70px',
-    height: '70px',
-    borderRadius: '12px',
+    width: '74px',
+    height: '74px',
+    borderRadius: '14px',
     objectFit: 'cover'
   },
   prodInfo: {
@@ -227,26 +242,26 @@ const styles = {
   },
   prodTitle: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.1rem',
+    fontSize: '1.18rem',
     color: '#3B2A1E'
   },
   priceRow: {
-    fontSize: '0.88rem',
+    fontSize: '0.9rem',
     color: '#6E5B4D'
   },
   prodActions: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px'
+    gap: '12px'
   },
   actionBtn: {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    padding: '8px 14px',
+    padding: '9px 16px',
     borderRadius: '12px',
     border: '1px solid',
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     fontWeight: '700',
     color: '#3B2A1E',
     cursor: 'pointer'
@@ -254,20 +269,21 @@ const styles = {
   ordersList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '14px'
   },
   orderCard: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '14px',
-    padding: '16px',
+    borderRadius: '16px',
+    padding: '18px 20px',
     display: 'flex',
-    gap: '14px',
-    alignItems: 'flex-start'
+    gap: '16px',
+    alignItems: 'flex-start',
+    boxShadow: '0 4px 14px rgba(59, 42, 30, 0.04)'
   },
   orderIconBox: {
-    width: '40px',
-    height: '40px',
+    width: '42px',
+    height: '42px',
     borderRadius: '12px',
     backgroundColor: '#F8ECE4',
     display: 'flex',
@@ -278,24 +294,24 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '4px'
+    marginBottom: '6px'
   },
   customerName: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.1rem',
+    fontSize: '1.15rem',
     color: '#3B2A1E'
   },
   orderContact: {
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     color: '#6E5B4D'
   },
   orderNotes: {
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     color: '#3B2A1E',
     fontStyle: 'italic',
-    marginTop: '4px',
+    marginTop: '6px',
     backgroundColor: '#FAF3E7',
-    padding: '6px 10px',
-    borderRadius: '8px'
+    padding: '8px 12px',
+    borderRadius: '10px'
   }
 };

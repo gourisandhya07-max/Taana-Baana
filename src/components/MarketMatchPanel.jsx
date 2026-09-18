@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sparkles, ArrowUpRight, ShieldCheck, Leaf, Briefcase, Compass, Globe, Info } from 'lucide-react';
+import { Sparkles, ShieldCheck, Leaf, Briefcase, Compass, Globe, Info } from 'lucide-react';
 import { analyzeMarketMatches } from '../lib/marketMatchingEngine';
+import { translations } from '../lib/translations';
 
 const ICON_MAP = {
   Leaf: Leaf,
@@ -11,7 +12,8 @@ const ICON_MAP = {
 };
 
 export default function MarketMatchPanel({ product, lang = 'en' }) {
-  const matches = analyzeMarketMatches(product);
+  const matches = analyzeMarketMatches(product, lang);
+  const t = translations[lang] || translations.en;
 
   return (
     <div style={styles.card}>
@@ -22,12 +24,12 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
             <Sparkles size={20} color="#D9A441" />
           </div>
           <div>
-            <div style={styles.signatureTag}>SIGNATURE AI FEATURE</div>
-            <h3 style={styles.title}>AI Market Linkage Engine</h3>
+            <div style={styles.signatureTag}>{t.signatureAiFeature}</div>
+            <h3 style={styles.title}>{t.marketLinkageEngine}</h3>
           </div>
         </div>
         <p style={styles.subtitle}>
-          Ranked high-value buyer channels tailored for <strong>{product?.title || 'this craft'}</strong>.
+          {t.marketLinkageSub} <strong>{product?.title || 'this craft'}</strong>.
         </p>
       </div>
 
@@ -66,7 +68,7 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
                 <div style={styles.itemHeader}>
                   <h4 style={styles.segmentName}>{segment.name}</h4>
                   <div style={styles.scorePill}>
-                    <span style={styles.scoreText}>{segment.matchPercentage}% Match</span>
+                    <span style={styles.scoreText}>{segment.matchPercentage}% {t.match}</span>
                   </div>
                 </div>
 
@@ -75,19 +77,19 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
                 {/* AI Rationale & Actionable Tip */}
                 <div style={styles.reasonBox}>
                   <div style={styles.reasonRow}>
-                    <Info size={14} color="#C1602C" style={{ shrink: 0 }} />
-                    <span><strong>AI Rationale:</strong> {segment.reasoning}</span>
+                    <Info size={14} color="#C1602C" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>{t.aiRationale}</strong> {segment.reasoning}</span>
                   </div>
                   <div style={styles.tipRow}>
-                    <ShieldCheck size={14} color="#7C8A5A" style={{ shrink: 0 }} />
-                    <span><strong>Artisan Tip:</strong> {segment.actionTip}</span>
+                    <ShieldCheck size={14} color="#7C8A5A" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>{t.artisanTip}</strong> {segment.actionTip}</span>
                   </div>
                 </div>
 
                 {/* Typical Margin & Target Buyer */}
                 <div style={styles.metaRow}>
-                  <span style={styles.metaPill}>Target: {segment.targetBuyer}</span>
-                  <span style={styles.metaPillGold}>Est. Margin: {segment.typicalMargin}</span>
+                  <span style={styles.metaPill}><strong>{t.target}</strong> {segment.targetBuyer}</span>
+                  <span style={styles.metaPillGold}><strong>{t.estMargin}</strong> {segment.typicalMargin}</span>
                 </div>
               </div>
             </div>
@@ -102,20 +104,20 @@ const styles = {
   card: {
     backgroundColor: '#FAF3E7',
     border: '2px solid #D9A441',
-    borderRadius: '20px',
-    padding: '24px',
+    borderRadius: '24px',
+    padding: '28px',
     boxShadow: '0 8px 30px rgba(217, 164, 65, 0.12)',
     position: 'relative',
     overflow: 'hidden'
   },
   header: {
-    marginBottom: '20px'
+    marginBottom: '24px'
   },
   titleGroup: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '6px'
+    marginBottom: '8px'
   },
   signatureBadge: {
     width: '46px',
@@ -128,18 +130,18 @@ const styles = {
     boxShadow: '0 4px 12px rgba(59, 42, 30, 0.2)'
   },
   signatureTag: {
-    fontSize: '0.7rem',
+    fontSize: '0.72rem',
     fontWeight: '800',
     color: '#C1602C',
     letterSpacing: '0.12em'
   },
   title: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.45rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.5rem',
     color: '#3B2A1E'
   },
   subtitle: {
-    fontSize: '0.9rem',
+    fontSize: '0.94rem',
     color: '#6E5B4D',
     marginTop: '4px'
   },
@@ -149,9 +151,9 @@ const styles = {
     gap: '16px'
   },
   item: {
-    borderRadius: '14px',
+    borderRadius: '16px',
     border: '1px solid',
-    padding: '18px',
+    padding: '20px',
     display: 'flex',
     gap: '16px',
     transition: 'all 0.25s ease'
@@ -163,14 +165,14 @@ const styles = {
     gap: '8px'
   },
   rankNum: {
-    fontSize: '0.78rem',
+    fontSize: '0.8rem',
     fontWeight: '800',
     padding: '2px 8px',
     borderRadius: '10px'
   },
   iconCircle: {
-    width: '38px',
-    height: '38px',
+    width: '40px',
+    height: '40px',
     borderRadius: '50%',
     backgroundColor: '#F8ECE4',
     display: 'flex',
@@ -181,75 +183,79 @@ const styles = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px'
+    gap: '8px'
   },
   itemHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '8px'
   },
   segmentName: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.1rem',
+    fontSize: '1.15rem',
     color: '#3B2A1E'
   },
   scorePill: {
     backgroundColor: '#C1602C',
     color: '#FFFFFF',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    fontSize: '0.78rem',
+    padding: '4px 12px',
+    borderRadius: '14px',
+    fontSize: '0.8rem',
     fontWeight: '800'
   },
   descText: {
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     color: '#6E5B4D',
-    lineHeight: '1.4'
+    lineHeight: '1.5'
   },
   reasonBox: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '10px',
-    padding: '10px 12px',
+    borderRadius: '12px',
+    padding: '12px 14px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px',
+    gap: '8px',
     margin: '6px 0'
   },
   reasonRow: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '6px',
-    fontSize: '0.82rem',
-    color: '#3B2A1E'
+    gap: '8px',
+    fontSize: '0.85rem',
+    color: '#3B2A1E',
+    lineHeight: '1.4'
   },
   tipRow: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '6px',
-    fontSize: '0.82rem',
-    color: '#5C693E'
+    gap: '8px',
+    fontSize: '0.85rem',
+    color: '#5C693E',
+    lineHeight: '1.4'
   },
   metaRow: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '8px',
-    marginTop: '4px'
+    gap: '10px',
+    marginTop: '6px'
   },
   metaPill: {
-    fontSize: '0.75rem',
+    fontSize: '0.78rem',
     color: '#5C6B73',
     backgroundColor: '#EBF0F3',
-    padding: '2px 8px',
-    borderRadius: '6px'
+    padding: '4px 10px',
+    borderRadius: '8px'
   },
   metaPillGold: {
-    fontSize: '0.75rem',
+    fontSize: '0.78rem',
     color: '#3B2A1E',
     backgroundColor: '#FAF2DF',
     border: '1px solid #E5B24E',
     fontWeight: '700',
-    padding: '2px 8px',
-    borderRadius: '6px'
+    padding: '4px 10px',
+    borderRadius: '8px'
   }
 };
