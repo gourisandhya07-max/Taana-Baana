@@ -1,92 +1,151 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Volume2, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Mic, MicOff, Volume2, CheckCircle2, RefreshCw, Play, Square, Edit3 } from 'lucide-react';
 import { translations } from '../lib/translations';
 
 export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderText }) {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [interimText, setInterimText] = useState('');
   const [audioLevel, setAudioLevel] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  
   const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const audioPlayerRef = useRef(null);
   const t = translations[lang] || translations.en;
 
   useEffect(() => {
-    // Check Web Speech API browser support
+    // Initialize Web Speech API for live exact speech-to-text
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const rec = new SpeechRecognition();
       rec.continuous = true;
       rec.interimResults = true;
 
-      // Set recognition language based on app language
+      // Set regional speech language
       if (lang === 'ml') rec.lang = 'ml-IN';
       else if (lang === 'hi') rec.lang = 'hi-IN';
       else rec.lang = 'en-IN';
 
       rec.onresult = (event) => {
-        let currentText = '';
+        let finalStr = '';
+        let interimStr = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          currentText += event.results[i][0].transcript;
+          const trans = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalStr += trans + ' ';
+          } else {
+            interimStr += trans;
+          }
         }
-        setTranscript(currentText);
-        onTranscribed?.(currentText);
+        if (finalStr) {
+          setTranscript(prev => {
+            const updated = (prev + ' ' + finalStr).trim();
+            onTranscribed?.(updated);
+            return updated;
+          });
+        }
+        setInterimText(interimStr);
       };
 
       rec.onerror = (err) => {
-        console.warn('Speech Recognition error, switching to smart fallback:', err);
+        console.warn('Speech recognition status:', err.error);
+      };
+
+      rec.onend = () => {
+        setInterimText('');
       };
 
       recognitionRef.current = rec;
     }
   }, [lang]);
 
-  // Visual audio wave simulation during recording
+  // Audio Wave Animation during recording
   useEffect(() => {
     let interval;
     if (isRecording) {
       interval = setInterval(() => {
-        setAudioLevel(Math.floor(Math.random() * 85) + 15);
-      }, 120);
+        setAudioLevel(Math.floor(Math.random() * 80) + 20);
+      }, 100);
     } else {
       setAudioLevel(0);
     }
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      // Stop recording
-      setIsRecording(false);
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e){}
-      }
-      setIsProcessing(true);
-      setTimeout(() => {
-        setIsProcessing(false);
-        // If no transcript from WebSpeech API, generate realistic regional craft description sample
-        if (!transcript || transcript.trim().length < 5) {
-          const sampleText = getSampleTranscript(lang);
-          setTranscript(sampleText);
-          onTranscribed?.(sampleText);
-        }
-      }, 900);
-    } else {
-      // Start recording
-      setTranscript('');
-      setIsRecording(true);
-      if (recognitionRef.current) {
-        try { recognitionRef.current.start(); } catch(e){}
+  const startRecording = async () => {
+    setInterimText('');
+    setIsRecording(true);
+
+    // 1. Start Speech Recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (e) {}
+    }
+
+    // 2. Start MediaRecorder for actual voice audio recording playback
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+        };
+
+        mediaRecorder.start();
+      } catch (e) {
+        console.warn('Microphone permission not granted for raw audio recording:', e);
       }
     }
   };
 
-  const getSampleTranscript = (language) => {
-    if (language === 'ml') {
-      return "ഈ സാരി ചേന്ദമംഗലത്തുണ്ടാക്കിയ ശുദ്ധമായ പരുത്തിയും യഥാർത്ഥ ഗോൾഡൻ സെരി ബോർഡറും ചേർത്ത കൈത്തറിയാണ്. പത്തു ദിവസമെടുത്താണ് നെയ്തെടുത്തത്.";
-    } else if (language === 'hi') {
-      return "यह मोलेला गांव की पारंपरिक हाथ से बनी मिट्टी की मटकी है। इसमें प्राकृतिक खनिज रंगों का उपयोग किया गया है जो पानी को प्राकृतिक ठंडा रखते हैं।";
+  const stopRecording = () => {
+    setIsRecording(false);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
     }
-    return "This handloom Kasavu saree was pit-loom woven in Chendamangalam using pure organic cotton yarn and natural gold zari thread over 14 crafting days.";
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop(); } catch (e) {}
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const handleClear = () => {
+    setTranscript('');
+    setInterimText('');
+    setAudioUrl(null);
+    onTranscribed?.('');
+  };
+
+  const handlePlayVoice = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audioPlayerRef.current = audio;
+      setIsPlayingAudio(true);
+      audio.play();
+      audio.onended = () => setIsPlayingAudio(false);
+    }
   };
 
   return (
@@ -96,33 +155,35 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
           <Volume2 size={20} color="#C1602C" />
         </div>
         <div>
-          <h4 style={styles.title}>{t.voiceRecordTitle || "Describe Your Product by Voice"}</h4>
-          <p style={styles.subtitle}>{t.voiceRecordPrompt}</p>
+          <h4 style={styles.title}>{t.voiceRecordTitle || "Speak & Record Product Details"}</h4>
+          <p style={styles.subtitle}>
+            Speak into your mic in <strong>{lang === 'ml' ? 'Malayalam' : lang === 'hi' ? 'Hindi' : 'English'}</strong>. Your exact spoken words will appear live.
+          </p>
         </div>
       </div>
 
-      {/* Mic Trigger Button & Audio Wave Animation */}
+      {/* Mic Trigger & Live Wave Animation */}
       <div style={styles.recordSection}>
         <button
           onClick={toggleRecording}
+          type="button"
           style={{
             ...styles.micButton,
             backgroundColor: isRecording ? '#C1602C' : '#FAF3E7',
             borderColor: isRecording ? '#C1602C' : '#E8D9C5',
             boxShadow: isRecording ? '0 0 24px rgba(193, 96, 44, 0.4)' : '0 4px 14px rgba(0,0,0,0.06)'
           }}
-          type="button"
         >
           {isRecording ? (
-            <MicOff size={28} color="#FFFFFF" />
+            <Square size={24} color="#FFFFFF" fill="#FFFFFF" />
           ) : (
             <Mic size={28} color="#C1602C" />
           )}
         </button>
 
-        {/* Audio Wave Visualizer Bars */}
+        {/* Live Audio Visualizer Bars */}
         <div style={styles.waveVisualizer}>
-          {[40, 80, 50, 95, 60, 100, 45, 75, 30].map((h, i) => (
+          {[35, 75, 50, 90, 60, 100, 40, 80, 25].map((h, i) => (
             <div
               key={i}
               style={{
@@ -135,20 +196,60 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
         </div>
 
         <span style={styles.statusLabel}>
-          {isRecording ? t.recordingState : isProcessing ? 'AI Transcribing audio...' : 'Tap Mic to Speak'}
+          {isRecording ? '🔴 Recording Live Speech... Speak now!' : transcript ? '✅ Voice Recorded' : 'Tap Mic to Start Live Recording'}
         </span>
       </div>
 
-      {/* Transcript Result Field */}
-      {transcript && (
-        <div style={styles.resultBox}>
-          <div style={styles.resultHeader}>
-            <CheckCircle2 size={16} color="#7C8A5A" />
-            <span style={styles.resultTitle}>{t.transcriptionResult}</span>
-          </div>
-          <p style={styles.resultText}>{transcript}</p>
+      {/* Live Interim Speech Stream Output */}
+      {interimText && (
+        <div style={styles.interimBox}>
+          <span style={styles.interimText}>Listening: "{interimText}"...</span>
         </div>
       )}
+
+      {/* Exact Transcribed Text Output Field */}
+      <div style={styles.resultBox}>
+        <div style={styles.resultHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <CheckCircle2 size={16} color="#7C8A5A" />
+            <span style={styles.resultTitle}>Recorded Spoken Text (Exact Audio):</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {audioUrl && (
+              <button
+                type="button"
+                onClick={handlePlayVoice}
+                style={styles.smallActionBtn}
+              >
+                <Play size={12} />
+                <span>{isPlayingAudio ? 'Playing...' : 'Play Audio'}</span>
+              </button>
+            )}
+            {transcript && (
+              <button
+                type="button"
+                onClick={handleClear}
+                style={styles.smallActionBtn}
+              >
+                <RefreshCw size={12} />
+                <span>Clear</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <textarea
+          rows="3"
+          value={transcript}
+          onChange={(e) => {
+            setTranscript(e.target.value);
+            onTranscribed?.(e.target.value);
+          }}
+          placeholder={placeholderText || "Your exact live voice recording transcript will appear here. You can also edit or type directly..."}
+          style={styles.transcriptInput}
+        />
+      </div>
     </div>
   );
 }
@@ -157,9 +258,9 @@ const styles = {
   card: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '16px',
+    borderRadius: '18px',
     padding: '20px',
-    boxShadow: '0 4px 16px rgba(59, 42, 30, 0.05)'
+    boxShadow: '0 4px 18px rgba(59, 42, 30, 0.05)'
   },
   topRow: {
     display: 'flex',
@@ -178,7 +279,7 @@ const styles = {
   },
   title: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.1rem',
+    fontSize: '1.15rem',
     color: '#3B2A1E'
   },
   subtitle: {
@@ -190,9 +291,9 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     gap: '12px',
-    padding: '16px 0',
-    backgroundColor: '#F8F3EA',
-    borderRadius: '12px',
+    padding: '18px 0',
+    backgroundColor: '#FAF3E7',
+    borderRadius: '14px',
     border: '1px dashed #E8D9C5'
   },
   micButton: {
@@ -215,35 +316,66 @@ const styles = {
   waveBar: {
     width: '4px',
     borderRadius: '4px',
-    transition: 'height 0.12s ease'
+    transition: 'height 0.1s ease'
   },
   statusLabel: {
-    fontSize: '0.85rem',
+    fontSize: '0.88rem',
     fontWeight: '700',
     color: '#3B2A1E'
   },
+  interimBox: {
+    marginTop: '10px',
+    padding: '8px 14px',
+    backgroundColor: '#FAF2DF',
+    borderRadius: '8px',
+    border: '1px solid #E5B24E'
+  },
+  interimText: {
+    fontSize: '0.85rem',
+    color: '#C1602C',
+    fontStyle: 'italic',
+    fontWeight: '600'
+  },
   resultBox: {
     marginTop: '16px',
-    backgroundColor: '#F0F3E8',
-    border: '1px solid #7C8A5A',
-    borderRadius: '10px',
-    padding: '12px 16px'
+    backgroundColor: '#F8F3EA',
+    border: '1px solid #E8D9C5',
+    borderRadius: '12px',
+    padding: '14px'
   },
   resultHeader: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '6px',
-    marginBottom: '4px'
+    marginBottom: '8px'
   },
   resultTitle: {
     fontSize: '0.82rem',
     fontWeight: '700',
-    color: '#5C693E'
+    color: '#3B2A1E'
   },
-  resultText: {
+  smallActionBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    background: '#FFFFFF',
+    border: '1px solid #E8D9C5',
+    borderRadius: '12px',
+    padding: '3px 10px',
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    color: '#3B2A1E',
+    cursor: 'pointer'
+  },
+  transcriptInput: {
+    width: '100%',
+    padding: '10px',
+    borderRadius: '8px',
+    border: '1px solid #E8D9C5',
     fontSize: '0.92rem',
     color: '#3B2A1E',
-    fontStyle: 'italic',
-    lineHeight: '1.4'
+    backgroundColor: '#FFFFFF',
+    resize: 'none',
+    lineHeight: '1.5'
   }
 };

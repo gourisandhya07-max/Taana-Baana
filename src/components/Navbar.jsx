@@ -1,7 +1,8 @@
 import React from 'react';
+import TaanaBaanaLogo from './TaanaBaanaLogo';
 import LanguageSelector from './LanguageSelector';
 import { translations } from '../lib/translations';
-import { ShoppingBag, LayoutDashboard, PlusCircle, Home, UserCheck, Sparkles } from 'lucide-react';
+import { ShoppingBag, LayoutDashboard, PlusCircle, Home, Sparkles } from 'lucide-react';
 
 export default function Navbar({
   activeView,
@@ -22,17 +23,11 @@ export default function Navbar({
 
       <div style={styles.navContainer}>
         {/* Brand Logo & Tagline */}
-        <div style={styles.logoWrapper} onClick={() => onViewChange('home')}>
-          <div style={styles.logoBadge}>
-            <span style={{ color: '#C1602C', fontWeight: '800' }}>t</span>
-            <span style={styles.logoIcon}>🧵</span>
-            <span style={{ color: '#7C8A5A', fontWeight: '800' }}>b</span>
-          </div>
-          <div>
-            <span style={styles.brandTitle}>taana-baana</span>
-            <span style={styles.brandTagline}>{t.tagline}</span>
-          </div>
-        </div>
+        <TaanaBaanaLogo
+          size="md"
+          showTagline={true}
+          onClick={() => onViewChange('home')}
+        />
 
         {/* Center Navigation Links */}
         <nav style={styles.navLinks}>
@@ -75,9 +70,7 @@ export default function Navbar({
               </button>
 
               <button
-                style={{
-                  ...styles.navBtnHighlight
-                }}
+                style={styles.navBtnHighlight}
                 onClick={() => onViewChange('add-product')}
               >
                 <PlusCircle size={16} />
@@ -122,10 +115,10 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 1000,
-    backgroundColor: 'rgba(250, 243, 231, 0.95)',
-    backdropFilter: 'blur(10px)',
+    backgroundColor: 'rgba(250, 243, 231, 0.96)',
+    backdropFilter: 'blur(12px)',
     borderBottom: '1px solid #E8D9C5',
-    boxShadow: '0 2px 12px rgba(59, 42, 30, 0.04)'
+    boxShadow: '0 4px 20px rgba(59, 42, 30, 0.05)'
   },
   topPatternBar: {
     height: '4px',
@@ -134,53 +127,16 @@ const styles = {
   navContainer: {
     maxWidth: '1280px',
     margin: '0 auto',
-    padding: '12px 24px',
+    padding: '10px 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: '16px'
   },
-  logoWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    cursor: 'pointer'
-  },
-  logoBadge: {
-    width: '38px',
-    height: '38px',
-    borderRadius: '12px',
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #E8D9C5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1rem',
-    boxShadow: '0 2px 8px rgba(59, 42, 30, 0.06)'
-  },
-  logoIcon: {
-    fontSize: '1.1rem',
-    margin: '0 2px'
-  },
-  brandTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.45rem',
-    fontWeight: '800',
-    color: '#3B2A1E',
-    display: 'block',
-    lineHeight: '1.1'
-  },
-  brandTagline: {
-    fontSize: '0.72rem',
-    color: '#C1602C',
-    fontWeight: '600',
-    letterSpacing: '0.04em',
-    display: 'block'
-  },
   navLinks: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px'
+    gap: '16px'
   },
   navBtn: {
     background: 'none',
@@ -206,7 +162,7 @@ const styles = {
     padding: '8px 16px',
     borderRadius: '20px',
     cursor: 'pointer',
-    boxShadow: '0 2px 10px rgba(193, 96, 44, 0.25)',
+    boxShadow: '0 4px 14px rgba(193, 96, 44, 0.3)',
     transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
   },
   rightGroup: {
