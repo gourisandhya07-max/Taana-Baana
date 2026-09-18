@@ -1,0 +1,336 @@
+/* ======================================================
+   TAANA BAANA — HISTORIC INDIAN CRAFT DESIGN SYSTEM
+   ====================================================== */
+
+:root {
+  /* Brand Palette */
+  --color-cream: #FAF3E7;
+  --color-cream-dark: #F3E6D3;
+  --color-terracotta: #C1602C;
+  --color-terracotta-hover: #A74E1F;
+  --color-terracotta-light: #F8ECE4;
+  --color-olive: #7C8A5A;
+  --color-olive-dark: #5C693E;
+  --color-olive-light: #F0F3E8;
+  --color-espresso: #3B2A1E;
+  --color-espresso-light: #5A4333;
+  --color-indigo: #5C6B73;
+  --color-indigo-light: #EBF0F3;
+  --color-gold: #D9A441;
+  --color-gold-light: #FAF2DF;
+
+  /* UI Neutral Tokens */
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F8F3EA;
+  --color-border: #E8D9C5;
+  --color-border-focus: #C1602C;
+  --color-text-main: #3B2A1E;
+  --color-text-muted: #6E5B4D;
+  --color-text-light: #9B8879;
+  
+  /* Status Colors */
+  --color-success: #4E8752;
+  --color-warning: #D9822B;
+  --color-info: #467B96;
+  
+  /* Typography */
+  --font-heading: 'Playfair Display', 'Rozha One', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Radii & Shadows */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 2px 8px rgba(59, 42, 30, 0.05);
+  --shadow-md: 0 8px 24px rgba(59, 42, 30, 0.08);
+  --shadow-lg: 0 16px 36px rgba(59, 42, 30, 0.12);
+  --shadow-hover: 0 12px 28px rgba(193, 96, 44, 0.15);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Reset & Base Setup */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-cream);
+  color: var(--color-text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(rgba(193, 96, 44, 0.03) 1px, transparent 1px),
+    radial-gradient(rgba(124, 138, 90, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-espresso);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+p {
+  color: var(--color-text-muted);
+}
+
+a {
+  color: var(--color-terracotta);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-terracotta-hover);
+}
+
+/* ======================================================
+   CRAFT MOTIFS & TEMPLE BORDER DECORATIONS
+   ====================================================== */
+
+.temple-border-top {
+  position: relative;
+}
+.temple-border-top::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--color-terracotta),
+    var(--color-terracotta) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.temple-border-bottom {
+  position: relative;
+}
+.temple-border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-olive),
+    var(--color-olive) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+/* Woven Divider Line */
+.woven-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.woven-divider::before,
+.woven-divider::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+}
+
+/* ======================================================
+   BUTTONS & TACTILE INTERACTION STYLES
+   ====================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-bounce);
+  user-select: none;
+  text-align: center;
+}
+
+.btn:hover {
+  transform: rotate(-1deg) scale(1.03);
+}
+
+.btn:active {
+  transform: rotate(0deg) scale(0.97);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-terracotta), #D96E34);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(193, 96, 44, 0.3);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(193, 96, 44, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--color-olive), #8DA066);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(124, 138, 90, 0.3);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--color-espresso);
+  color: var(--color-espresso);
+}
+.btn-outline:hover {
+  background-color: var(--color-espresso);
+  color: var(--color-cream);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-espresso);
+}
+.btn-ghost:hover {
+  background-color: rgba(59, 42, 30, 0.05);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--color-gold), #E5B24E);
+  color: var(--color-espresso);
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(217, 164, 65, 0.35);
+}
+
+/* Big Action Touch Targets for Low Digital Literacy */
+.btn-large-touch {
+  padding: 1.1rem 2rem;
+  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
+}
+
+/* ======================================================
+   CARD & CONTAINER ANIMATIONS
+   ====================================================== */
+
+.craft-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.craft-card-float {
+  animation: floatWobble 4s ease-in-out infinite;
+}
+
+.craft-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--color-terracotta-light);
+}
+
+@keyframes floatWobble {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(0.3deg);
+  }
+}
+
+/* ======================================================
+   ACCESSIBILITY & REDUCED MOTION
+   ====================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .craft-card-float {
+    animation: none !important;
+  }
+}
+
+/* ======================================================
+   BADGES & PILLS
+   ====================================================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-terracotta {
+  background-color: var(--color-terracotta-light);
+  color: var(--color-terracotta);
+}
+
+.badge-olive {
+  background-color: var(--color-olive-light);
+  color: var(--color-olive-dark);
+}
+
+.badge-gold {
+  background-color: var(--color-gold-light);
+  color: var(--color-espresso);
+}
+
+.badge-indigo {
+  background-color: var(--color-indigo-light);
+  color: var(--color-indigo);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terracotta);
+}
