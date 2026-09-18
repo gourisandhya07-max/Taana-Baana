@@ -292,7 +292,6 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
               region: artisan?.region || 'Kerala',
               tags
             }}
-            lang={currentLang}
           />
 
           <div style={{ ...styles.btnRow, marginTop: '24px' }}>

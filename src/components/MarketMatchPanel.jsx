@@ -12,9 +12,9 @@ const ICON_MAP = {
 };
 
 export default function MarketMatchPanel({ product, lang = 'en' }) {
-  const matches = analyzeMarketMatches(product);
+  const matches = analyzeMarketMatches(product, lang);
   const t = translations[lang] || translations.en;
-  const productTitle = product?.title || t.thisCraft || 'this craft';
+  const productTitle = product?.title || 'this craft';
 
   return (
     <div style={styles.card}>
@@ -25,12 +25,12 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
             <Sparkles size={20} color="#D9A441" />
           </div>
           <div>
-            <div style={styles.signatureTag}>{t.marketEngineTag}</div>
-            <h3 style={styles.title}>{t.signatureFeatureTitle}</h3>
+            <div style={styles.signatureTag}>{t.signatureAiFeature || "SIGNATURE AI FEATURE"}</div>
+            <h3 style={styles.title}>{t.marketLinkageEngine || "AI Market Linkage Engine"}</h3>
           </div>
         </div>
         <p style={styles.subtitle}>
-          {t.marketEngineIntro} <strong>{productTitle}</strong>.
+          {t.marketLinkageSub || "Ranked high-value buyer channels tailored for"} <strong>{productTitle}</strong>.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
                 <div style={styles.itemHeader}>
                   <h4 style={styles.segmentName}>{segment.name}</h4>
                   <div style={styles.scorePill}>
-                    <span style={styles.scoreText}>{(t.matchPercent || '{value}% Match').replace('{value}', segment.matchPercentage)}</span>
+                    <span style={styles.scoreText}>{segment.matchPercentage}% {t.match || "Match"}</span>
                   </div>
                 </div>
 
@@ -78,19 +78,19 @@ export default function MarketMatchPanel({ product, lang = 'en' }) {
                 {/* AI Rationale & Actionable Tip */}
                 <div style={styles.reasonBox}>
                   <div style={styles.reasonRow}>
-                    <Info size={14} color="#C1602C" style={{ shrink: 0 }} />
-                    <span><strong>{t.aiRationale}:</strong> {segment.reasoning}</span>
+                    <Info size={14} color="#C1602C" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>{t.aiRationale || "AI Rationale:"}</strong> {segment.reasoning}</span>
                   </div>
                   <div style={styles.tipRow}>
-                    <ShieldCheck size={14} color="#7C8A5A" style={{ shrink: 0 }} />
-                    <span><strong>{t.artisanTip}:</strong> {segment.actionTip}</span>
+                    <ShieldCheck size={14} color="#7C8A5A" style={{ flexShrink: 0, marginTop: '2px' }} />
+                    <span><strong>{t.artisanTip || "Artisan Tip:"}</strong> {segment.actionTip}</span>
                   </div>
                 </div>
 
                 {/* Typical Margin & Target Buyer */}
                 <div style={styles.metaRow}>
-                  <span style={styles.metaPill}>{t.targetBuyer}: {segment.targetBuyer}</span>
-                  <span style={styles.metaPillGold}>{t.estMargin}: {segment.typicalMargin}</span>
+                  <span style={styles.metaPill}><strong>{t.target || "Target:"}</strong> {segment.targetBuyer}</span>
+                  <span style={styles.metaPillGold}><strong>{t.estMargin || "Est. Margin:"}</strong> {segment.typicalMargin}</span>
                 </div>
               </div>
             </div>

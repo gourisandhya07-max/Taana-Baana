@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
 import VoiceRecorder from '../components/VoiceRecorder';
 import LanguageSelector from '../components/LanguageSelector';
-import { translations } from '../lib/translations';
-import { User, Phone, MapPin, Award, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
+import TaanaBaanaLogo from '../components/TaanaBaanaLogo';
+import { translations, getLocalizedCategory } from '../lib/translations';
+import { User, Phone, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const CRAFT_OPTIONS = [
-  { id: 'Weaving', label: 'Handloom Weaving & Sarees', icon: '🧵' },
-  { id: 'Pottery', label: 'Terracotta & Clay Pottery', icon: '🏺' },
-  { id: 'Woodwork', label: 'Wood Carving & Toys', icon: '🪵' },
-  { id: 'Metalwork', label: 'Dhokra & Brass Metalwork', icon: '🪔' },
-  { id: 'Embroidery', label: 'Chikan & Zari Needlework', icon: '🪡' },
-  { id: 'Leather', label: 'Jutti & Handcrafted Leather', icon: '👞' }
-];
-
-export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
+export default function Onboarding({ onComplete, currentLang = 'en', onSelectLang }) {
   const [step, setStep] = useState(1); // 1: Phone OTP, 2: Craft & Profile
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -24,6 +16,15 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
   const [region, setRegion] = useState('Chendamangalam, Kerala');
   const [bio, setBio] = useState('');
   const t = translations[currentLang] || translations.en;
+
+  const craftOptions = [
+    { id: 'Weaving', label: t.catWeaving, icon: '🧵' },
+    { id: 'Pottery', label: t.catPottery, icon: '🏺' },
+    { id: 'Woodwork', label: t.catWoodwork, icon: '🪵' },
+    { id: 'Metalwork', label: t.catMetalwork, icon: '🪔' },
+    { id: 'Embroidery', label: t.catEmbroidery, icon: '🪡' },
+    { id: 'Leather', label: t.catLeather, icon: '👞' }
+  ];
 
   const handleSendOtp = (e) => {
     e.preventDefault();
@@ -48,7 +49,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
       full_name: fullName || "Master Artisan",
       phone: phone || "+91 98470 12345",
       preferred_language: currentLang,
-      craft_type: selectedCraft,
+      craft_type: getLocalizedCategory(selectedCraft, currentLang),
       region: region,
       bio: bio || "Traditional artisan preserving historic Indian handloom heritage."
     };
@@ -60,7 +61,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
       <div style={styles.card}>
         {/* Top Header */}
         <div style={styles.header}>
-          <div style={styles.logoBadge}>🧵</div>
+          <TaanaBaanaLogo size="sm" showTagline={false} />
           <div>
             <h2 style={styles.title}>{t.onboardingTitle}</h2>
             <p style={styles.subtitle}>{t.onboardingSubtitle}</p>
@@ -93,16 +94,16 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '10px' }}>
-                  {t.sendOtpBtn} ➔
+                  {t.sendOtpBtn}
                 </button>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} style={styles.form}>
                 <div style={styles.otpNotice}>
-                  <span>{t.otpNoticeStart} <strong>{phone}</strong> {t.otpNoticeEnd}</span>
+                  <span>{t.smsNotice} <strong>{phone}</strong> {t.demoNotice}</span>
                 </div>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>{t.otpLabel}</label>
+                  <label style={styles.label}>{t.enterOtp}</label>
                   <input
                     type="text"
                     required
@@ -112,7 +113,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
                   />
                 </div>
                 <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '10px' }}>
-                  {t.verifyOtpBtn} ➔
+                  {t.verifyContinueBtn}
                 </button>
               </form>
             )}
@@ -144,7 +145,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
             <div style={styles.fieldGroup}>
               <label style={styles.label}>{t.craftTypeLabel}</label>
               <div style={styles.craftGrid}>
-                {CRAFT_OPTIONS.map((c) => {
+                {craftOptions.map((c) => {
                   const isSel = selectedCraft === c.id;
                   return (
                     <button
@@ -199,7 +200,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
             </div>
 
             <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '16px' }}>
-              {t.completeOnboardingBtn} ➔
+              {t.completeOnboardingBtn}
             </button>
           </form>
         )}
@@ -210,44 +211,35 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
 
 const styles = {
   container: {
-    maxWidth: '680px',
+    maxWidth: '720px',
     margin: '40px auto',
     padding: '0 20px'
   },
   card: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '24px',
-    padding: '32px',
-    boxShadow: '0 12px 36px rgba(59, 42, 30, 0.08)'
+    borderRadius: '28px',
+    padding: '36px',
+    boxShadow: '0 14px 40px rgba(59, 42, 30, 0.08)'
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: '14px',
-    marginBottom: '28px',
+    gap: '16px',
+    marginBottom: '32px',
     paddingBottom: '20px',
-    borderBottom: '1px solid #E8D9C5'
-  },
-  logoBadge: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '16px',
-    backgroundColor: '#FAF3E7',
-    border: '1px solid #E8D9C5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.5rem'
+    borderBottom: '1px solid #E8D9C5',
+    flexWrap: 'wrap'
   },
   title: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.6rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.7rem',
     color: '#3B2A1E'
   },
   subtitle: {
-    fontSize: '0.9rem',
-    color: '#6E5B4D'
+    fontSize: '0.92rem',
+    color: '#6E5B4D',
+    marginTop: '2px'
   },
   langWrapper: {
     marginLeft: 'auto'
@@ -259,17 +251,17 @@ const styles = {
   },
   stepTitle: {
     fontFamily: "'Playfair Display', serif",
-    fontSize: '1.3rem',
+    fontSize: '1.35rem',
     color: '#3B2A1E'
   },
   stepDesc: {
-    fontSize: '0.9rem',
+    fontSize: '0.92rem',
     color: '#6E5B4D'
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px'
+    gap: '18px'
   },
   fieldGroup: {
     display: 'flex',
@@ -284,11 +276,11 @@ const styles = {
   inputWithIcon: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '12px',
     backgroundColor: '#FAF3E7',
     border: '1px solid #E8D9C5',
-    borderRadius: '12px',
-    padding: '10px 14px'
+    borderRadius: '14px',
+    padding: '12px 16px'
   },
   input: {
     flex: 1,
@@ -301,24 +293,24 @@ const styles = {
   otpNotice: {
     backgroundColor: '#FAF2DF',
     border: '1px solid #E5B24E',
-    borderRadius: '10px',
-    padding: '10px 14px',
-    fontSize: '0.85rem',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    fontSize: '0.88rem',
     color: '#3B2A1E'
   },
   craftGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '12px'
+    gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+    gap: '14px'
   },
   craftBtn: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    padding: '16px',
-    borderRadius: '14px',
+    gap: '10px',
+    padding: '18px',
+    borderRadius: '16px',
     border: '2px solid',
     cursor: 'pointer',
     transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'

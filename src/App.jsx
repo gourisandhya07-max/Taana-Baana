@@ -9,6 +9,7 @@ import ArtisanDashboard from './pages/ArtisanDashboard';
 import AddProduct from './pages/AddProduct';
 import Onboarding from './pages/Onboarding';
 import OrderModal from './components/OrderModal';
+import TaanaBaanaLogo from './components/TaanaBaanaLogo';
 import { api } from './lib/supabaseClient';
 import { translations } from './lib/translations';
 import './styles/theme.css';
@@ -164,6 +165,7 @@ export default function App() {
             onBack={() => setActiveView('marketplace')}
             onSelectProduct={handleSelectProduct}
             onSelectMarketMatch={handleSelectMarketMatch}
+            currentLang={currentLang}
           />
         )}
 
@@ -176,6 +178,7 @@ export default function App() {
             }}
             onSelectProduct={handleSelectProduct}
             onSelectMarketMatch={handleSelectMarketMatch}
+            currentLang={currentLang}
           />
         )}
 
@@ -202,6 +205,7 @@ export default function App() {
           product={selectedProduct || { id: 'prod_1', title: 'Chendamangalam Handwoven Kasavu Saree', final_price: 3950 }}
           artisan={currentArtisanProfile}
           onClose={() => setShowCartModal(false)}
+          currentLang={currentLang}
         />
       )}
 
@@ -209,7 +213,13 @@ export default function App() {
       <footer style={styles.footer}>
         <div style={styles.footerInner}>
           <div style={styles.footerBrand}>
-            <div style={styles.footerLogoBadge}>🧵</div>
+            <div style={styles.footerLogoBadge}>
+              <img
+                src="/brand-logo.png"
+                alt="Taana Baana Logo"
+                style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+              />
+            </div>
             <div>
               <span style={styles.footerTitle}>taana-baana</span>
               <span style={styles.footerSub}>{t.footerTagline}</span>
