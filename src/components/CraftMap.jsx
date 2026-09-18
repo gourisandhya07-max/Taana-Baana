@@ -1,42 +1,85 @@
 import React from 'react';
-import { MapPin, Sparkles } from 'lucide-react';
+import { MapPin } from 'lucide-react';
+import { translations } from '../lib/translations';
 
-export default function CraftMap({ selectedRegion, onSelectRegion }) {
-  const regions = [
+export default function CraftMap({ selectedRegion, onSelectRegion, currentLang = 'en' }) {
+  const t = translations[currentLang] || translations.en;
+
+  const regionalCrafts = [
     {
       id: 'kerala',
-      name: 'Kerala (Chendamangalam)',
-      craft: 'Kasavu Handloom Weaving',
-      color: '#C1602C',
-      coords: { x: '35%', y: '82%' }
+      filterKey: 'Kerala',
+      names: {
+        en: 'Kerala (Chendamangalam)',
+        ml: 'കേരളം (ചേന്ദമംഗലം)',
+        hi: 'केरल (चेन्दमंगलम)'
+      },
+      crafts: {
+        en: 'Kasavu Handloom Weaving',
+        ml: 'കസവ് കൈത്തറി നെയ്ത്ത്',
+        hi: 'कसावु हथकरघा बुनाई'
+      },
+      color: '#C1602C'
     },
     {
       id: 'rajasthan',
-      name: 'Rajasthan (Molela)',
-      craft: 'Terracotta & Clay Votive Art',
-      color: '#D9A441',
-      coords: { x: '25%', y: '35%' }
+      filterKey: 'Rajasthan',
+      names: {
+        en: 'Rajasthan (Molela)',
+        ml: 'രാജസ്ഥാൻ (മൊലേല)',
+        hi: 'राजस्थान (मोलेला)'
+      },
+      crafts: {
+        en: 'Terracotta & Clay Votive Art',
+        ml: 'ടെറാക്കോട്ട & മൺപാത്ര കല',
+        hi: 'टेराकोटा व मिट्टी की मूर्तियाँ'
+      },
+      color: '#D9A441'
     },
     {
       id: 'up',
-      name: 'Uttar Pradesh (Lucknow)',
-      craft: 'Chikankari & Shadow Embroidery',
-      color: '#7C8A5A',
-      coords: { x: '45%', y: '32%' }
+      filterKey: 'Uttar Pradesh',
+      names: {
+        en: 'Uttar Pradesh (Lucknow)',
+        ml: 'ഉത്തർപ്രദേശ് (ലഖ്‌നൗ)',
+        hi: 'उत्तर प्रदेश (लखनऊ)'
+      },
+      crafts: {
+        en: 'Chikankari & Shadow Embroidery',
+        ml: 'ചിക്കൻകാരി & ഷാഡോ വർക്ക്',
+        hi: 'चिकनकारी व छाया कढ़ाई'
+      },
+      color: '#7C8A5A'
     },
     {
       id: 'chhattisgarh',
-      name: 'Chhattisgarh (Bastar)',
-      craft: 'Dhokra Lost-Wax Metalwork',
-      color: '#5C6B73',
-      coords: { x: '52%', y: '52%' }
+      filterKey: 'Chhattisgarh',
+      names: {
+        en: 'Chhattisgarh (Bastar)',
+        ml: 'ഛത്തീസ്ഗഢ് (ബസ്തർ)',
+        hi: 'छत्तीसगढ़ (बस्तर)'
+      },
+      crafts: {
+        en: 'Dhokra Lost-Wax Metalwork',
+        ml: 'ധോക്ര ലോസ്റ്റ്-വാക്സ് ഓട്ടുപണി',
+        hi: 'ढोकरा लुप्त-मोम कांस्य कला'
+      },
+      color: '#5C6B73'
     },
     {
       id: 'kashmir',
-      name: 'Kashmir (Srinagar)',
-      craft: 'Pashmina & Sozni Needlework',
-      color: '#3B2A1E',
-      coords: { x: '32%', y: '15%' }
+      filterKey: 'Kashmir',
+      names: {
+        en: 'Kashmir (Srinagar)',
+        ml: 'കശ്മീർ (ശ്രീനഗർ)',
+        hi: 'कश्मीर (श्रीनगर)'
+      },
+      crafts: {
+        en: 'Pashmina & Sozni Needlework',
+        ml: 'പശ്മിന & സോസ്നി തയ്യൽ',
+        hi: 'पश्मीना व सोज़नी सुई-कढ़ाई'
+      },
+      color: '#3B2A1E'
     }
   ];
 
@@ -45,30 +88,33 @@ export default function CraftMap({ selectedRegion, onSelectRegion }) {
       <div style={styles.header}>
         <div style={styles.titleRow}>
           <MapPin size={22} color="#C1602C" />
-          <h3 style={styles.title}>Interactive Craft Geography of India</h3>
+          <h3 style={styles.title}>{t.mapTitle}</h3>
         </div>
-        <p style={styles.subtitle}>Explore regional handloom clusters & traditional artisan hubs</p>
+        <p style={styles.subtitle}>{t.mapSubtitle}</p>
       </div>
 
       <div style={styles.mapGrid}>
-        {regions.map((reg) => {
-          const isSelected = selectedRegion?.toLowerCase().includes(reg.name.split(' ')[0].toLowerCase());
+        {regionalCrafts.map((reg) => {
+          const isSelected = selectedRegion?.toLowerCase().includes(reg.filterKey.toLowerCase());
+          const regionName = reg.names[currentLang] || reg.names.en;
+          const craftDesc = reg.crafts[currentLang] || reg.crafts.en;
+
           return (
             <div
               key={reg.id}
-              onClick={() => onSelectRegion(isSelected ? 'All Regions' : reg.name.split(' ')[0])}
+              onClick={() => onSelectRegion(isSelected ? 'All Regions' : reg.filterKey)}
               style={{
                 ...styles.regionCard,
                 borderColor: isSelected ? reg.color : '#E8D9C5',
                 backgroundColor: isSelected ? '#FAF2DF' : '#FFFFFF',
-                boxShadow: isSelected ? '0 4px 16px rgba(193, 96, 44, 0.15)' : 'none'
+                boxShadow: isSelected ? '0 6px 20px rgba(193, 96, 44, 0.16)' : '0 2px 8px rgba(0,0,0,0.03)'
               }}
             >
               <div style={styles.pinHeader}>
                 <div style={{ ...styles.colorDot, backgroundColor: reg.color }} />
-                <span style={styles.regionName}>{reg.name}</span>
+                <span style={styles.regionName}>{regionName}</span>
               </div>
-              <p style={styles.craftDesc}>{reg.craft}</p>
+              <p style={styles.craftDesc}>{craftDesc}</p>
             </div>
           );
         })}
@@ -81,38 +127,38 @@ const styles = {
   card: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '18px',
-    padding: '24px',
-    boxShadow: '0 4px 16px rgba(59, 42, 30, 0.05)',
-    marginBottom: '28px'
+    borderRadius: '24px',
+    padding: '28px',
+    boxShadow: '0 4px 20px rgba(59, 42, 30, 0.05)',
+    marginBottom: '32px'
   },
   header: {
-    marginBottom: '16px'
+    marginBottom: '20px'
   },
   titleRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '10px'
   },
   title: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.25rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.4rem',
     color: '#3B2A1E'
   },
   subtitle: {
-    fontSize: '0.85rem',
+    fontSize: '0.9rem',
     color: '#6E5B4D',
-    marginTop: '2px'
+    marginTop: '4px'
   },
   mapGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-    gap: '12px'
+    gap: '14px'
   },
   regionCard: {
-    border: '1px solid',
-    borderRadius: '12px',
-    padding: '14px',
+    border: '1.5px solid',
+    borderRadius: '16px',
+    padding: '16px',
     cursor: 'pointer',
     transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
   },
@@ -120,7 +166,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    marginBottom: '4px'
+    marginBottom: '6px'
   },
   colorDot: {
     width: '10px',
@@ -128,12 +174,13 @@ const styles = {
     borderRadius: '50%'
   },
   regionName: {
-    fontSize: '0.9rem',
+    fontSize: '0.92rem',
     fontWeight: '700',
     color: '#3B2A1E'
   },
   craftDesc: {
-    fontSize: '0.8rem',
-    color: '#6E5B4D'
+    fontSize: '0.82rem',
+    color: '#6E5B4D',
+    lineHeight: '1.4'
   }
 };

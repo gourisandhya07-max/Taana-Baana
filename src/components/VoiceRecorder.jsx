@@ -155,10 +155,8 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
           <Volume2 size={20} color="#C1602C" />
         </div>
         <div>
-          <h4 style={styles.title}>{t.voiceRecordTitle || "Speak & Record Product Details"}</h4>
-          <p style={styles.subtitle}>
-            Speak into your mic in <strong>{lang === 'ml' ? 'Malayalam' : lang === 'hi' ? 'Hindi' : 'English'}</strong>. Your exact spoken words will appear live.
-          </p>
+          <h4 style={styles.title}>{t.voiceRecordTitle}</h4>
+          <p style={styles.subtitle}>{t.voiceRecordSubtitle}</p>
         </div>
       </div>
 
@@ -196,14 +194,14 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
         </div>
 
         <span style={styles.statusLabel}>
-          {isRecording ? '🔴 Recording Live Speech... Speak now!' : transcript ? '✅ Voice Recorded' : 'Tap Mic to Start Live Recording'}
+          {isRecording ? t.recordingLive : transcript ? t.voiceRecorded : t.tapMicToStart}
         </span>
       </div>
 
       {/* Live Interim Speech Stream Output */}
       {interimText && (
         <div style={styles.interimBox}>
-          <span style={styles.interimText}>Listening: "{interimText}"...</span>
+          <span style={styles.interimText}>{t.listening} "{interimText}"...</span>
         </div>
       )}
 
@@ -212,7 +210,7 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
         <div style={styles.resultHeader}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <CheckCircle2 size={16} color="#7C8A5A" />
-            <span style={styles.resultTitle}>Recorded Spoken Text (Exact Audio):</span>
+            <span style={styles.resultTitle}>{t.recordedSpokenText}</span>
           </div>
 
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -223,7 +221,7 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
                 style={styles.smallActionBtn}
               >
                 <Play size={12} />
-                <span>{isPlayingAudio ? 'Playing...' : 'Play Audio'}</span>
+                <span>{isPlayingAudio ? t.playing : t.playAudio}</span>
               </button>
             )}
             {transcript && (
@@ -233,7 +231,7 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
                 style={styles.smallActionBtn}
               >
                 <RefreshCw size={12} />
-                <span>Clear</span>
+                <span>{t.clear}</span>
               </button>
             )}
           </div>
@@ -246,7 +244,7 @@ export default function VoiceRecorder({ lang = 'en', onTranscribed, placeholderT
             setTranscript(e.target.value);
             onTranscribed?.(e.target.value);
           }}
-          placeholder={placeholderText || "Your exact live voice recording transcript will appear here. You can also edit or type directly..."}
+          placeholder={placeholderText || t.transcriptionPlaceholder}
           style={styles.transcriptInput}
         />
       </div>

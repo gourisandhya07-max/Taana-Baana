@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import { api } from '../lib/supabaseClient';
-import { MapPin, ArrowLeft, Volume2, Award, Phone, Calendar, Sparkles } from 'lucide-react';
+import { translations, getLocalizedProduct } from '../lib/translations';
+import { MapPin, ArrowLeft, Volume2, Award, Calendar } from 'lucide-react';
 
-export default function ArtisanStorefront({ artisan, onBack, onSelectProduct, onSelectMarketMatch }) {
+export default function ArtisanStorefront({
+  artisan,
+  onBack,
+  onSelectProduct,
+  onSelectMarketMatch,
+  currentLang = 'en'
+}) {
   const [products, setProducts] = useState([]);
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
+  const t = translations[currentLang] || translations.en;
 
   useEffect(() => {
     async function loadCrafts() {
@@ -26,7 +34,7 @@ export default function ArtisanStorefront({ artisan, onBack, onSelectProduct, on
       {/* Back button */}
       <button onClick={onBack} style={styles.backBtn}>
         <ArrowLeft size={18} />
-        <span>Back</span>
+        <span>{t.back}</span>
       </button>
 
       {/* Artisan Profile Hero Banner */}
@@ -51,11 +59,11 @@ export default function ArtisanStorefront({ artisan, onBack, onSelectProduct, on
           <div style={styles.statsRow}>
             <div style={styles.statPill}>
               <Award size={16} color="#D9A441" />
-              <span>Verified Master Craftsman</span>
+              <span>{t.verifiedMaster}</span>
             </div>
             <div style={styles.statPill}>
               <Calendar size={16} color="#5C6B73" />
-              <span>38+ Years Heritage Tradition</span>
+              <span>{t.yearsHeritage}</span>
             </div>
           </div>
 
@@ -71,26 +79,30 @@ export default function ArtisanStorefront({ artisan, onBack, onSelectProduct, on
             }}
           >
             <Volume2 size={16} />
-            <span>{isPlayingVoice ? '🔊 Playing Artisan Voice Story...' : '▶ Listen to Artisan Self-Introduction'}</span>
+            <span>{isPlayingVoice ? t.playingSelfIntro : t.listenSelfIntro}</span>
           </button>
         </div>
       </div>
 
       {/* Artisan's Listed Collection */}
-      <section style={{ marginTop: '40px' }}>
+      <section style={{ marginTop: '48px' }}>
         <h2 style={styles.sectionTitle}>
-          Artisan Handcrafted Collection ({products.length})
+          {t.artisanCollection} ({products.length})
         </h2>
         <div style={styles.productGrid}>
-          {products.map((prod) => (
-            <ProductCard
-              key={prod.id}
-              product={prod}
-              artisan={artisan}
-              onClick={() => onSelectProduct(prod)}
-              onSelectMarketMatch={onSelectMarketMatch}
-            />
-          ))}
+          {products.map((prod) => {
+            const localizedProd = getLocalizedProduct(prod, currentLang);
+            return (
+              <ProductCard
+                key={prod.id}
+                product={localizedProd}
+                artisan={artisan}
+                currentLang={currentLang}
+                onClick={() => onSelectProduct(localizedProd)}
+                onSelectMarketMatch={onSelectMarketMatch}
+              />
+            );
+          })}
         </div>
       </section>
     </div>
@@ -99,32 +111,32 @@ export default function ArtisanStorefront({ artisan, onBack, onSelectProduct, on
 
 const styles = {
   container: {
-    maxWidth: '1200px',
+    maxWidth: '1240px',
     margin: '0 auto',
-    padding: '30px 24px 60px 24px'
+    padding: '40px 24px 80px 24px'
   },
   backBtn: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: '8px',
     background: 'none',
     border: 'none',
     color: '#3B2A1E',
     fontWeight: '700',
-    fontSize: '0.9rem',
+    fontSize: '0.92rem',
     cursor: 'pointer',
-    marginBottom: '24px'
+    marginBottom: '28px'
   },
   artisanHero: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '24px',
-    padding: '36px',
+    borderRadius: '28px',
+    padding: '40px',
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '28px',
+    gap: '32px',
     alignItems: 'center',
-    boxShadow: '0 8px 28px rgba(59, 42, 30, 0.06)'
+    boxShadow: '0 8px 32px rgba(59, 42, 30, 0.06)'
   },
   avatar: {
     width: '140px',
@@ -138,7 +150,7 @@ const styles = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px'
+    gap: '12px'
   },
   badgeRow: {
     display: 'flex',
@@ -154,14 +166,14 @@ const styles = {
     color: '#5C693E'
   },
   artisanName: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '2.4rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '2.5rem',
     color: '#3B2A1E'
   },
   bioText: {
-    fontSize: '1rem',
+    fontSize: '1.02rem',
     color: '#6E5B4D',
-    lineHeight: '1.5'
+    lineHeight: '1.6'
   },
   statsRow: {
     display: 'flex',
@@ -174,35 +186,37 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     backgroundColor: '#FAF3E7',
-    padding: '6px 14px',
+    padding: '8px 16px',
     borderRadius: '20px',
-    fontSize: '0.82rem',
+    fontSize: '0.85rem',
     fontWeight: '700',
     color: '#3B2A1E'
   },
   voiceBtn: {
     color: '#FAF3E7',
     border: 'none',
-    padding: '10px 20px',
-    borderRadius: '14px',
+    padding: '12px 22px',
+    borderRadius: '16px',
     fontWeight: '700',
-    fontSize: '0.9rem',
+    fontSize: '0.92rem',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '8px',
     cursor: 'pointer',
     alignSelf: 'flex-start',
-    marginTop: '6px'
+    marginTop: '8px',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 14px rgba(59, 42, 30, 0.2)'
   },
   sectionTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '1.8rem',
+    fontFamily: "'Playfair Display', 'Cinzel', serif",
+    fontSize: '1.9rem',
     color: '#3B2A1E',
-    marginBottom: '20px'
+    marginBottom: '24px'
   },
   productGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px'
+    gap: '28px'
   }
 };
