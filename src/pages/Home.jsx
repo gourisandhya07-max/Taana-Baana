@@ -16,6 +16,31 @@ export default function Home({
   const [selectedRegion, setSelectedRegion] = useState('All Regions');
   const t = translations[currentLang] || translations.en;
 
+  const heroTags = t.heroTags || [
+    '🧵 Pit-loom Handlooms',
+    '🏺 Terracotta Votives',
+    '🪡 Lucknow Chikankari',
+    '🪔 Bastar Dhokra Brass'
+  ];
+
+  const featureCards = [
+    {
+      title: t.featureCardOneTitle,
+      body: t.featureCardOneBody,
+      icon: <Zap size={24} color="#C1602C" />
+    },
+    {
+      title: t.featureCardTwoTitle,
+      body: t.featureCardTwoBody,
+      icon: <Award size={24} color="#D9A441" />
+    },
+    {
+      title: t.featureCardThreeTitle,
+      body: t.featureCardThreeBody,
+      icon: <HeartHandshake size={24} color="#7C8A5A" />
+    }
+  ];
+
   useEffect(() => {
     async function loadData() {
       const [prods, arts] = await Promise.all([
@@ -31,7 +56,11 @@ export default function Home({
   return (
     <div style={styles.container}>
       {/* Hero Section */}
-      <section style={styles.heroSection}>
+      <section className="parallax-scene hero-scene" style={styles.heroSection}>
+        <div className="parallax-layer hero-orb hero-orb-one" />
+        <div className="parallax-layer hero-orb hero-orb-two" />
+        <div className="parallax-layer hero-grid" />
+
         <div style={styles.heroBadge}>
           <Sparkles size={14} color="#D9A441" />
           <span>{t.brandSubtitle}</span>
@@ -66,51 +95,28 @@ export default function Home({
 
         {/* Floating Motifs */}
         <div style={styles.floatingMotifBar}>
-          <div style={styles.motifItem}>🧵 Pit-loom Handlooms</div>
-          <div style={styles.motifItem}>🏺 Terracotta Votives</div>
-          <div style={styles.motifItem}>🪡 Lucknow Chikankari</div>
-          <div style={styles.motifItem}>🪔 Bastar Dhokra Brass</div>
+          {heroTags.map((tag, index) => (
+            <div key={index} style={styles.motifItem}>{tag}</div>
+          ))}
         </div>
       </section>
 
       {/* Signature AI Market Linkage Feature Showcase */}
       <section style={styles.signatureSection}>
         <div style={styles.signatureHeader}>
-          <div style={styles.signatureBadge}>SIGNATURE INNOVATION</div>
+          <div style={styles.signatureBadge}>{t.signatureBadge}</div>
           <h2 style={styles.signatureTitle}>{t.signatureFeatureTitle}</h2>
           <p style={styles.signatureDesc}>{t.signatureFeatureDesc}</p>
         </div>
 
         <div style={styles.featureGrid}>
-          <div className="craft-card" style={styles.featureCard}>
-            <div style={styles.featureIconBox}>
-              <Zap size={24} color="#C1602C" />
+          {featureCards.map((card) => (
+            <div key={card.title} className="craft-card" style={styles.featureCard}>
+              <div style={styles.featureIconBox}>{card.icon}</div>
+              <h3 style={styles.featureTitle}>{card.title}</h3>
+              <p style={styles.featureBody}>{card.body}</p>
             </div>
-            <h3 style={styles.featureTitle}>1. AI Vision & Voice Cataloging</h3>
-            <p style={styles.featureBody}>
-              Artisans simply snap a photo and describe their craft in Malayalam, Hindi, or English. AI automatically extracts heritage story, title, tags, and category.
-            </p>
-          </div>
-
-          <div className="craft-card" style={styles.featureCard}>
-            <div style={styles.featureIconBox}>
-              <Award size={24} color="#D9A441" />
-            </div>
-            <h3 style={styles.featureTitle}>2. Fair Wage Intelligence</h3>
-            <p style={styles.featureBody}>
-              Calculates material inputs and hours worked to guarantee a fair artisan wage floor (₹150+/hr) and recommended market price range.
-            </p>
-          </div>
-
-          <div className="craft-card" style={styles.featureCard}>
-            <div style={styles.featureIconBox}>
-              <HeartHandshake size={24} color="#7C8A5A" />
-            </div>
-            <h3 style={styles.featureTitle}>3. Direct Buyer Matching</h3>
-            <p style={styles.featureBody}>
-              Ranks target buyers (Eco Boutiques, Luxury Decorators, Corporate Gifting) and connects buyers directly to the artisan without middleman commission.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -129,11 +135,11 @@ export default function Home({
       <section style={styles.craftsSection}>
         <div style={styles.craftsHeader}>
           <div>
-            <h2 style={styles.sectionHeading}>Authentic Artisan Collections</h2>
-            <p style={styles.sectionSubheading}>Direct from weaver pit-looms and village pottery wheels</p>
+            <h2 style={styles.sectionHeading}>{t.authenticCollections}</h2>
+            <p style={styles.sectionSubheading}>{t.liveMarketplaceSubtitle}</p>
           </div>
           <button onClick={() => onNavigate('marketplace')} style={styles.seeAllBtn}>
-            <span>View All Crafts</span>
+            <span>{t.viewAllCrafts}</span>
             <ArrowRight size={16} />
           </button>
         </div>
@@ -159,13 +165,15 @@ const styles = {
     paddingBottom: '60px'
   },
   heroSection: {
-    maxWidth: '1000px',
+    position: 'relative',
+    maxWidth: '1100px',
     margin: '0 auto',
-    padding: '60px 24px 40px 24px',
+    padding: '90px 24px 50px 24px',
     textAlign: 'center',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    overflow: 'hidden'
   },
   heroBadge: {
     display: 'inline-flex',
@@ -181,18 +189,19 @@ const styles = {
     marginBottom: '20px'
   },
   heroTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '3.4rem',
+    fontFamily: 'var(--font-heading)',
+    fontSize: 'clamp(2.8rem, 6vw, 5.2rem)',
     color: '#3B2A1E',
-    lineHeight: '1.15',
-    letterSpacing: '-0.02em',
-    marginBottom: '18px'
+    lineHeight: '0.95',
+    letterSpacing: '-0.04em',
+    marginBottom: '18px',
+    textShadow: '0 12px 28px rgba(59, 42, 30, 0.08)'
   },
   heroSubtitle: {
-    fontSize: '1.2rem',
+    fontSize: '1.08rem',
     color: '#6E5B4D',
-    maxWidth: '740px',
-    lineHeight: '1.6',
+    maxWidth: '760px',
+    lineHeight: '1.75',
     marginBottom: '32px'
   },
   heroCtaGroup: {

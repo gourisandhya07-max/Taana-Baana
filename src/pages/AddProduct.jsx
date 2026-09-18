@@ -282,6 +282,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           <p style={styles.subtitle}>Review recommended market channels before publishing to the marketplace.</p>
 
           <MarketMatchPanel
+            lang={currentLang}
             product={{
               title,
               category,

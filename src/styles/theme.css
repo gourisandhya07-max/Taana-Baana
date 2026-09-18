@@ -27,6 +27,11 @@
   --color-text-main: #3B2A1E;
   --color-text-muted: #6E5B4D;
   --color-text-light: #9B8879;
+
+  /* Parallax / motion */
+  --scrollY: 0px;
+  --pointer-x: 0px;
+  --pointer-y: 0px;
   
   /* Status Colors */
   --color-success: #4E8752;
@@ -34,8 +39,10 @@
   --color-info: #467B96;
   
   /* Typography */
-  --font-heading: 'Playfair Display', 'Rozha One', Georgia, serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-hindi: 'Noto Sans Devanagari', 'Segoe UI', sans-serif;
+  --font-malayalam: 'Malavika', 'Noto Sans Malayalam', serif;
 
   /* Radii & Shadows */
   --radius-sm: 8px;
@@ -64,36 +71,160 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  letter-spacing: 0.01em;
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--color-cream);
   color: var(--color-text-main);
-  line-height: 1.6;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
   min-height: 100vh;
-  background-image: 
-    radial-gradient(rgba(193, 96, 44, 0.03) 1px, transparent 1px),
-    radial-gradient(rgba(124, 138, 90, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
+  transition: font-family 0.25s ease;
+  background:
+    radial-gradient(circle at top left, rgba(214, 127, 64, 0.12), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(96, 120, 78, 0.12), transparent 30%),
+    linear-gradient(180deg, #fffaf4 0%, #faf3e7 100%);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(rgba(193, 96, 44, 0.05) 1px, transparent 1px),
+    radial-gradient(rgba(124, 138, 90, 0.04) 1px, transparent 1px);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.18));
+}
+
+.app-shell {
+  position: relative;
+  overflow-x: clip;
+}
+
+.parallax-scene {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 1400px;
+}
+
+.parallax-layer {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+  transform: translate3d(calc(var(--pointer-x) * 0.5), calc(var(--scrollY) * -0.06), 0);
+  transition: transform 180ms ease-out;
+}
+
+.hero-scene {
+  isolation: isolate;
+}
+
+.hero-grid {
+  inset: 0;
+  background: linear-gradient(125deg, rgba(193, 96, 44, 0.08), transparent 40%, rgba(124, 138, 90, 0.1));
+  border-radius: 32px;
+  transform: translate3d(calc(var(--pointer-x) * 0.45), calc(var(--scrollY) * -0.08), 90px) rotateX(10deg);
+}
+
+.hero-orb {
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0.8;
+}
+
+.hero-orb-one {
+  width: 380px;
+  height: 380px;
+  right: 10%;
+  top: -30px;
+  background: radial-gradient(circle, rgba(217, 164, 65, 0.35), rgba(217, 164, 65, 0.08) 45%, transparent 70%);
+  transform: translate3d(calc(var(--pointer-x) * 1.2), calc(var(--scrollY) * -0.10), 120px);
+}
+
+.hero-orb-two {
+  width: 420px;
+  height: 420px;
+  left: 8%;
+  bottom: -40px;
+  background: radial-gradient(circle, rgba(124, 138, 90, 0.28), rgba(124, 138, 90, 0.08) 40%, transparent 72%);
+  transform: translate3d(calc(var(--pointer-x) * -1.1), calc(var(--scrollY) * -0.12), 140px);
+}
+
+body[data-lang='hi'],
+body[data-lang='hi'] *,
+body[data-lang='ml'],
+body[data-lang='ml'] * {
+  font-family: inherit;
+}
+
+body[data-lang='hi'] {
+  font-family: var(--font-hindi);
+}
+
+body[data-lang='ml'] {
+  font-family: var(--font-malayalam);
+}
+
+body[data-lang='hi'] h1,
+body[data-lang='hi'] h2,
+body[data-lang='hi'] h3,
+body[data-lang='hi'] h4,
+body[data-lang='hi'] h5,
+body[data-lang='hi'] h6,
+body[data-lang='ml'] h1,
+body[data-lang='ml'] h2,
+body[data-lang='ml'] h3,
+body[data-lang='ml'] h4,
+body[data-lang='ml'] h5,
+body[data-lang='ml'] h6 {
+  font-family: var(--font-hindi);
+}
+
+body[data-lang='ml'] h1,
+body[data-lang='ml'] h2,
+body[data-lang='ml'] h3,
+body[data-lang='ml'] h4,
+body[data-lang='ml'] h5,
+body[data-lang='ml'] h6 {
+  font-family: var(--font-malayalam);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   color: var(--color-espresso);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  word-spacing: 0.04em;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  letter-spacing: 0.01em;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(193, 96, 44, 0.5) rgba(255, 255, 255, 0.2);
 }
 
 p {
   color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+  line-height: 1.8;
 }
 
 a {
   color: var(--color-terracotta);
   text-decoration: none;
+  letter-spacing: 0.01em;
   transition: color var(--transition-fast);
 }
 

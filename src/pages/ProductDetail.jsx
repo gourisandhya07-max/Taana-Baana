@@ -41,7 +41,7 @@ export default function ProductDetail({
       {/* Back Button */}
       <button onClick={onBack} style={styles.backBtn}>
         <ArrowLeft size={18} />
-        <span>Back to Marketplace</span>
+        <span>{currentLang === 'en' ? 'Back to Marketplace' : currentLang === 'hi' ? 'बाजार पर वापस जाएं' : 'വിപണി തിരികെ പോകുക'}</span>
       </button>
 
       <div style={styles.mainGrid}>
@@ -80,8 +80,8 @@ export default function ProductDetail({
                 <Volume2 size={20} color="#C1602C" />
               </div>
               <div>
-                <h4 style={styles.voiceTitle}>Listen to Artisan Craft Story</h4>
-                <p style={styles.voiceSub}>Narrated by {artisan?.full_name || 'Master Weaver'}</p>
+                <h4 style={styles.voiceTitle}>{currentLang === 'en' ? 'Listen to Artisan Craft Story' : currentLang === 'hi' ? 'कारीगर की कला कहानी सुनें' : 'കരകൗശല хүമയൻ കഥ കേൾക്കൂ'}</h4>
+                <p style={styles.voiceSub}>{currentLang === 'en' ? 'Narrated by' : currentLang === 'hi' ? 'कहानी सुनाने वाला' : 'കഥодатель'} {artisan?.full_name || 'Master Weaver'}</p>
               </div>
             </div>
 
@@ -93,7 +93,7 @@ export default function ProductDetail({
               }}
             >
               <Volume2 size={16} />
-              <span>{isPlayingAudio ? '🔊 Playing Audio Narrative...' : '▶ Listen in Regional Language'}</span>
+              <span>{isPlayingAudio ? (currentLang === 'en' ? '🔊 Playing Audio Narrative...' : currentLang === 'hi' ? '🔊 ऑडियो कहानी चल रही है...' : '🔊 ഓഡിയോ കഥ കേൾക്കുന്നു...') : (currentLang === 'en' ? '▶ Listen in Regional Language' : currentLang === 'hi' ? '▶ स्थानीय भाषा में सुनें' : '▶ പ്രദേശിക ഭാഷയിൽ കേൾക്കൂ')}</span>
             </button>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function ProductDetail({
               style={styles.artisanAvatar}
             />
             <div style={{ flex: 1 }}>
-              <span style={styles.craftedByTag}>MASTER ARTISAN</span>
+              <span style={styles.craftedByTag}>{currentLang === 'en' ? 'MASTER ARTISAN' : currentLang === 'hi' ? 'मास्टर आर्टिसन' : 'മാസ്റ്റർ ആർട്ടിസൻ'}</span>
               <h4 style={styles.artisanName}>{artisan?.full_name || 'Devaki Amma'}</h4>
               <p style={styles.artisanBioSnippet}>{artisan?.bio || 'Preserving centuries-old handloom weaving traditions.'}</p>
             </div>
@@ -141,21 +141,21 @@ export default function ProductDetail({
           <div style={styles.specsBox}>
             <div style={styles.specItem}>
               <Clock size={16} color="#C1602C" />
-              <span>Crafting Time: <strong>{product.production_hours || 12} Hours</strong></span>
+              <span>{currentLang === 'en' ? 'Crafting Time:' : currentLang === 'hi' ? 'बनाने का समय:' : 'പണി എടുത്ത സമയം:'} <strong>{product.production_hours || 12} {currentLang === 'en' ? 'Hours' : currentLang === 'hi' ? 'घंटे' : 'മണിക്കൂർ'}</strong></span>
             </div>
             <div style={styles.specItem}>
               <Layers size={16} color="#7C8A5A" />
-              <span>Dimensions: <strong>{product.size || 'Customizable'}</strong></span>
+              <span>{currentLang === 'en' ? 'Dimensions:' : currentLang === 'hi' ? 'माप:' : 'അളവുകൾ:'} <strong>{product.size || (currentLang === 'en' ? 'Customizable' : currentLang === 'hi' ? 'अनुकूलित' : 'അനुकूलിതം')}</strong></span>
             </div>
             <div style={styles.specItem}>
               <ShieldCheck size={16} color="#D9A441" />
-              <span>Available Units: <strong>{product.quantity_available || 5} Ready in Stock</strong></span>
+              <span>{currentLang === 'en' ? 'Available Units:' : currentLang === 'hi' ? 'उपलब्ध मात्रा:' : 'ലഭ്യമായ എണ്ണം:'} <strong>{product.quantity_available || 5} {currentLang === 'en' ? 'Ready in Stock' : currentLang === 'hi' ? 'स्टॉक में उपलब्ध' : 'സ്റ്റോക്കിൽ ലഭ്യമാണ്'}</strong></span>
             </div>
           </div>
 
           {/* Story Description */}
           <div style={styles.descriptionBox}>
-            <h4 style={styles.descHeading}>Heritage & Craft Story</h4>
+            <h4 style={styles.descHeading}>{currentLang === 'en' ? 'Heritage & Craft Story' : currentLang === 'hi' ? 'परंपरा और कारीगरी की कहानी' : 'പാരമ്പര്യം & കരകൗശല കഥ'}</h4>
             <p style={styles.descBody}>{product.description}</p>
           </div>
 
@@ -166,7 +166,7 @@ export default function ProductDetail({
             style={{ width: '100%', marginTop: '8px' }}
           >
             <ShoppingBag size={20} />
-            <span>Contact Artisan / Submit Order Inquiry</span>
+            <span>{currentLang === 'en' ? 'Contact Artisan / Submit Order Inquiry' : currentLang === 'hi' ? 'कारीगर से संपर्क करें / ऑर्डर पूछताछ भेजें' : 'കരകൗശല വിദഗ്ധനോട് സംസാരിക്കൂ / ഓർഡർ ചോദ്യം അയക്കൂ'}</span>
           </button>
         </div>
       </div>

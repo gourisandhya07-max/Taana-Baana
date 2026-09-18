@@ -10,12 +10,14 @@ import AddProduct from './pages/AddProduct';
 import Onboarding from './pages/Onboarding';
 import OrderModal from './components/OrderModal';
 import { api } from './lib/supabaseClient';
+import { translations } from './lib/translations';
 import './styles/theme.css';
 
 export default function App() {
   const [activeView, setActiveView] = useState('home');
   const [userMode, setUserMode] = useState('artisan'); // 'artisan' | 'buyer'
   const [currentLang, setCurrentLang] = useState('en');
+  const t = translations[currentLang] || translations.en;
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [currentArtisanProfile, setCurrentArtisanProfile] = useState({
@@ -29,6 +31,32 @@ export default function App() {
   });
   const [inquiryCartCount, setInquiryCartCount] = useState(2);
   const [showCartModal, setShowCartModal] = useState(false);
+
+  useEffect(() => {
+    document.body.dataset.lang = currentLang;
+    document.documentElement.lang = currentLang;
+
+    const updateParallax = () => {
+      const scrollY = window.scrollY || 0;
+      document.documentElement.style.setProperty('--scrollY', `${scrollY}px`);
+    };
+
+    const updatePointer = (event) => {
+      const x = (event.clientX / window.innerWidth - 0.5) * 20;
+      const y = (event.clientY / window.innerHeight - 0.5) * 20;
+      document.documentElement.style.setProperty('--pointer-x', `${x.toFixed(2)}px`);
+      document.documentElement.style.setProperty('--pointer-y', `${y.toFixed(2)}px`);
+    };
+
+    updateParallax();
+    window.addEventListener('scroll', updateParallax, { passive: true });
+    window.addEventListener('pointermove', updatePointer);
+
+    return () => {
+      window.removeEventListener('scroll', updateParallax);
+      window.removeEventListener('pointermove', updatePointer);
+    };
+  }, [currentLang]);
 
   // Load initial orders count
   useEffect(() => {
@@ -71,7 +99,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Animated Splash Intro (Session tracked) */}
       <SplashIntro
         lang={currentLang}
@@ -184,11 +212,11 @@ export default function App() {
             <div style={styles.footerLogoBadge}>🧵</div>
             <div>
               <span style={styles.footerTitle}>taana-baana</span>
-              <span style={styles.footerSub}>From Hands to Markets • Powered by AI</span>
+              <span style={styles.footerSub}>{t.footerTagline}</span>
             </div>
           </div>
           <p style={styles.copyright}>
-            © 2026 Taana Baana. Interlocking tradition with ethical commerce.
+            {t.footerCopyright}
           </p>
         </div>
       </footer>

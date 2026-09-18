@@ -51,8 +51,8 @@ export default function Marketplace({
     <div style={styles.container}>
       {/* Search Header Banner */}
       <div style={styles.headerBanner}>
-        <h1 style={styles.heading}>Artisan Craft Marketplace</h1>
-        <p style={styles.subheading}>Buy authentic handlooms & heritage crafts directly from India's master artisans</p>
+        <h1 style={styles.heading}>{t.marketplaceTitle}</h1>
+        <p style={styles.subheading}>{t.marketplaceSubtitle}</p>
 
         {/* Search Input Bar */}
         <div style={styles.searchBar}>
@@ -61,7 +61,7 @@ export default function Marketplace({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={t.searchPlaceholder || "Search Kasavu sarees, terracotta pitchers, brass statues..."}
+            placeholder={t.marketplaceSearchLabel || t.searchPlaceholder || "Search crafts..."}
             style={styles.searchInput}
           />
         </div>
@@ -124,8 +124,8 @@ export default function Marketplace({
       {products.length === 0 ? (
         <div style={styles.emptyState}>
           <Sparkles size={36} color="#C1602C" />
-          <h3 style={styles.emptyTitle}>No Crafts Match Your Criteria</h3>
-          <p style={styles.emptySub}>Try adjusting search term or state filter</p>
+          <h3 style={styles.emptyTitle}>{t.noResultsTitle}</h3>
+          <p style={styles.emptySub}>{t.noResultsSub}</p>
           <button
             onClick={() => {
               setSearchTerm('');
@@ -135,7 +135,7 @@ export default function Marketplace({
             className="btn btn-outline"
             style={{ marginTop: '12px' }}
           >
-            Reset Filters
+            {t.resetFilters}
           </button>
         </div>
       ) : (

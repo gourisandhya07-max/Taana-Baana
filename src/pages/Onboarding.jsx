@@ -73,8 +73,8 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
         {/* STEP 1: Phone & OTP Authentication */}
         {step === 1 && (
           <div style={styles.stepBox}>
-            <h3 style={styles.stepTitle}>Step 1: Phone Verification</h3>
-            <p style={styles.stepDesc}>Enter your mobile number to receive an SMS verification code.</p>
+            <h3 style={styles.stepTitle}>{t.step1Title}</h3>
+            <p style={styles.stepDesc}>{t.step1Desc}</p>
 
             {!isOtpSent ? (
               <form onSubmit={handleSendOtp} style={styles.form}>
@@ -93,16 +93,16 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
                   </div>
                 </div>
                 <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '10px' }}>
-                  Send OTP via SMS ➔
+                  {t.sendOtpBtn} ➔
                 </button>
               </form>
             ) : (
               <form onSubmit={handleVerifyOtp} style={styles.form}>
                 <div style={styles.otpNotice}>
-                  <span>SMS Code sent to <strong>{phone}</strong> (Demo OTP: 123456)</span>
+                  <span>{t.otpNoticeStart} <strong>{phone}</strong> {t.otpNoticeEnd}</span>
                 </div>
                 <div style={styles.fieldGroup}>
-                  <label style={styles.label}>Enter 6-Digit OTP Code</label>
+                  <label style={styles.label}>{t.otpLabel}</label>
                   <input
                     type="text"
                     required
@@ -112,7 +112,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
                   />
                 </div>
                 <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '10px' }}>
-                  Verify & Continue ➔
+                  {t.verifyOtpBtn} ➔
                 </button>
               </form>
             )}
@@ -122,11 +122,11 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
         {/* STEP 2: Guided Large Button Artisan Profile */}
         {step === 2 && (
           <form onSubmit={handleFinalSubmit} style={styles.stepBox}>
-            <h3 style={styles.stepTitle}>Step 2: Artisan Details</h3>
+            <h3 style={styles.stepTitle}>{t.step2Title}</h3>
 
             {/* Name Input */}
             <div style={styles.fieldGroup}>
-              <label style={styles.label}>Your Full Name</label>
+              <label style={styles.label}>{t.fullNameLabel}</label>
               <div style={styles.inputWithIcon}>
                 <User size={18} color="#C1602C" />
                 <input
@@ -199,7 +199,7 @@ export default function Onboarding({ onComplete, currentLang, onSelectLang }) {
             </div>
 
             <button type="submit" className="btn btn-primary btn-large-touch" style={{ width: '100%', marginTop: '16px' }}>
-              Complete Onboarding & Start Cataloging ➔
+              {t.completeOnboardingBtn} ➔
             </button>
           </form>
         )}
