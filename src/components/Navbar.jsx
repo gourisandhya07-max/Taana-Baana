@@ -2,15 +2,16 @@ import React from 'react';
 import TaanaBaanaLogo from './TaanaBaanaLogo';
 import LanguageSelector from './LanguageSelector';
 import { translations } from '../lib/translations';
-import { ShoppingBag, LayoutDashboard, PlusCircle, Home, Sparkles } from 'lucide-react';
+import { ShoppingBag, LayoutDashboard, PlusCircle, Home, User } from 'lucide-react';
 
 export default function Navbar({
   activeView,
   onViewChange,
-  currentLang,
+  currentLang = 'en',
   onSelectLang,
-  userMode,
-  onToggleUserMode,
+  userMode = 'buyer',
+  currentArtisanProfile,
+  onOpenAuth,
   cartCount = 0,
   onOpenCart
 }) {
@@ -18,24 +19,25 @@ export default function Navbar({
 
   return (
     <header style={styles.header}>
-      {/* Temple Border Ribbon at Top */}
+      {/* Temple Border Pattern Bar */}
       <div style={styles.topPatternBar} />
 
       <div style={styles.navContainer}>
-        {/* Brand Logo & Tagline */}
+        {/* 1. Left: Brand Logo & Tagline */}
         <TaanaBaanaLogo
           size="md"
           showTagline={true}
           onClick={() => onViewChange('home')}
         />
 
-        {/* Center Navigation Links */}
+        {/* 2. Center: Navigation Links */}
         <nav style={styles.navLinks}>
           <button
             style={{
               ...styles.navBtn,
               color: activeView === 'home' ? '#C1602C' : '#3B2A1E',
-              fontWeight: activeView === 'home' ? '700' : '500'
+              fontWeight: activeView === 'home' ? '700' : '500',
+              borderBottom: activeView === 'home' ? '2px solid #C1602C' : '2px solid transparent'
             }}
             onClick={() => onViewChange('home')}
           >
@@ -47,7 +49,8 @@ export default function Navbar({
             style={{
               ...styles.navBtn,
               color: activeView === 'marketplace' ? '#C1602C' : '#3B2A1E',
-              fontWeight: activeView === 'marketplace' ? '700' : '500'
+              fontWeight: activeView === 'marketplace' ? '700' : '500',
+              borderBottom: activeView === 'marketplace' ? '2px solid #C1602C' : '2px solid transparent'
             }}
             onClick={() => onViewChange('marketplace')}
           >
@@ -61,7 +64,8 @@ export default function Navbar({
                 style={{
                   ...styles.navBtn,
                   color: activeView === 'dashboard' ? '#C1602C' : '#3B2A1E',
-                  fontWeight: activeView === 'dashboard' ? '700' : '500'
+                  fontWeight: activeView === 'dashboard' ? '700' : '500',
+                  borderBottom: activeView === 'dashboard' ? '2px solid #C1602C' : '2px solid transparent'
                 }}
                 onClick={() => onViewChange('dashboard')}
               >
@@ -80,29 +84,32 @@ export default function Navbar({
           )}
         </nav>
 
-        {/* Right Section: Mode Toggle + Language Selector + Cart */}
-        <div style={styles.rightGroup}>
-          {/* Artisan vs Buyer Mode Switcher */}
-          <button
-            onClick={onToggleUserMode}
-            style={{
-              ...styles.modeToggleBtn,
-              backgroundColor: userMode === 'artisan' ? '#FAF2DF' : '#EBF0F3',
-              borderColor: userMode === 'artisan' ? '#D9A441' : '#5C6B73'
-            }}
-            title={t.modeToggleTooltip}
-          >
-            <Sparkles size={14} color={userMode === 'artisan' ? '#D9A441' : '#5C6B73'} />
-            <span>{userMode === 'artisan' ? t.switchArtisan : t.switchBuyer}</span>
-          </button>
+        {/* 3. Spacer */}
+        <div style={{ flex: 1 }} />
 
-          {/* Multilingual Selector */}
+        {/* 4. Right Controls: Language Selector + Cart + Login/Profile */}
+        <div style={styles.rightGroup}>
+          {/* Compact Language Selector Dropdown */}
           <LanguageSelector currentLang={currentLang} onSelectLang={onSelectLang} />
 
-          {/* Cart / Inquiry Counter */}
-          <button style={styles.cartBtn} onClick={onOpenCart} title={t.inquiriesTooltip}>
+          {/* Cart / Inquiry Counter Button */}
+          <button style={styles.cartBtn} onClick={onOpenCart} title="View Inquiries">
             <ShoppingBag size={18} color="#3B2A1E" />
             {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+          </button>
+
+          {/* Login / Profile Button */}
+          <button
+            onClick={onOpenAuth}
+            style={{
+              ...styles.profileBtn,
+              backgroundColor: userMode === 'artisan' ? '#C1602C' : '#FFFFFF',
+              color: userMode === 'artisan' ? '#FFFFFF' : '#3B2A1E',
+              borderColor: userMode === 'artisan' ? '#C1602C' : '#E8D9C5'
+            }}
+          >
+            <User size={16} />
+            <span>{userMode === 'artisan' ? currentArtisanProfile?.full_name?.split(' ')[0] || 'Artisan' : 'Log In'}</span>
           </button>
         </div>
       </div>
@@ -130,13 +137,12 @@ const styles = {
     padding: '10px 24px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '16px'
+    gap: '24px'
   },
   navLinks: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px'
+    gap: '20px'
   },
   navBtn: {
     background: 'none',
@@ -146,9 +152,9 @@ const styles = {
     gap: '6px',
     fontSize: '0.92rem',
     cursor: 'pointer',
-    padding: '6px 12px',
-    borderRadius: '8px',
-    transition: 'all 0.2s ease'
+    padding: '8px 4px',
+    transition: 'all 0.2s ease',
+    height: '38px'
   },
   navBtnHighlight: {
     background: 'linear-gradient(135deg, #C1602C, #D96E34)',
@@ -157,38 +163,26 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    fontSize: '0.9rem',
-    fontWeight: '600',
-    padding: '8px 16px',
+    fontSize: '0.88rem',
+    fontWeight: '700',
+    padding: '0 16px',
     borderRadius: '20px',
     cursor: 'pointer',
-    boxShadow: '0 4px 14px rgba(193, 96, 44, 0.3)',
-    transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+    boxShadow: '0 4px 12px rgba(193, 96, 44, 0.25)',
+    height: '38px'
   },
   rightGroup: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px'
   },
-  modeToggleBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '6px 14px',
-    borderRadius: '20px',
-    border: '1px solid',
-    fontSize: '0.82rem',
-    fontWeight: '700',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease'
-  },
   cartBtn: {
     position: 'relative',
     background: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
+    width: '38px',
+    height: '38px',
+    borderRadius: '20px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -209,5 +203,19 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  profileBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '0 16px',
+    borderRadius: '20px',
+    border: '1px solid',
+    fontSize: '0.85rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    height: '38px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+    transition: 'all 0.2s ease'
   }
 };

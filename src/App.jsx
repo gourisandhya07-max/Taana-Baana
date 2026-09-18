@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SplashIntro from './components/SplashIntro';
+import InitialLanguageModal from './components/InitialLanguageModal';
+import AuthModal from './components/AuthModal';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
@@ -9,16 +11,20 @@ import ArtisanDashboard from './pages/ArtisanDashboard';
 import AddProduct from './pages/AddProduct';
 import Onboarding from './pages/Onboarding';
 import OrderModal from './components/OrderModal';
-import TaanaBaanaLogo from './components/TaanaBaanaLogo';
 import { api } from './lib/supabaseClient';
-import { translations } from './lib/translations';
 import './styles/theme.css';
 
 export default function App() {
   const [activeView, setActiveView] = useState('home');
-  const [userMode, setUserMode] = useState('artisan'); // 'artisan' | 'buyer'
-  const [currentLang, setCurrentLang] = useState('en');
-  const t = translations[currentLang] || translations.en;
+  const [userMode, setUserMode] = useState('buyer'); // 'artisan' | 'buyer'
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem('taana_lang_selected') || 'en';
+  });
+  const [showInitialLangModal, setShowInitialLangModal] = useState(() => {
+    return !localStorage.getItem('taana_lang_selected');
+  });
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedArtisan, setSelectedArtisan] = useState(null);
   const [currentArtisanProfile, setCurrentArtisanProfile] = useState({
@@ -33,33 +39,7 @@ export default function App() {
   const [inquiryCartCount, setInquiryCartCount] = useState(2);
   const [showCartModal, setShowCartModal] = useState(false);
 
-  useEffect(() => {
-    document.body.dataset.lang = currentLang;
-    document.documentElement.lang = currentLang;
-
-    const updateParallax = () => {
-      const scrollY = window.scrollY || 0;
-      document.documentElement.style.setProperty('--scrollY', `${scrollY}px`);
-    };
-
-    const updatePointer = (event) => {
-      const x = (event.clientX / window.innerWidth - 0.5) * 20;
-      const y = (event.clientY / window.innerHeight - 0.5) * 20;
-      document.documentElement.style.setProperty('--pointer-x', `${x.toFixed(2)}px`);
-      document.documentElement.style.setProperty('--pointer-y', `${y.toFixed(2)}px`);
-    };
-
-    updateParallax();
-    window.addEventListener('scroll', updateParallax, { passive: true });
-    window.addEventListener('pointermove', updatePointer);
-
-    return () => {
-      window.removeEventListener('scroll', updateParallax);
-      window.removeEventListener('pointermove', updatePointer);
-    };
-  }, [currentLang]);
-
-  // Load initial orders count
+  // Sync saved orders count
   useEffect(() => {
     async function loadOrders() {
       const ords = await api.getOrders('artisan_1');
@@ -67,6 +47,17 @@ export default function App() {
     }
     loadOrders();
   }, []);
+
+  const handleSelectInitialLang = (langCode) => {
+    localStorage.setItem('taana_lang_selected', langCode);
+    setCurrentLang(langCode);
+    setShowInitialLangModal(false);
+  };
+
+  const handleSelectLang = (langCode) => {
+    localStorage.setItem('taana_lang_selected', langCode);
+    setCurrentLang(langCode);
+  };
 
   const handleSelectProduct = (prod) => {
     setSelectedProduct(prod);
@@ -100,14 +91,19 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Animated Splash Intro (Session tracked) */}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* 1. First-Time Visitor Language Selection Screen */}
+      {showInitialLangModal && (
+        <InitialLanguageModal onSelectLanguage={handleSelectInitialLang} />
+      )}
+
+      {/* 2. Animated Splash Intro (Session tracked) */}
       <SplashIntro
         lang={currentLang}
         onComplete={() => {}}
       />
 
-      {/* Main Sticky Navbar */}
+      {/* 3. Main Sticky Navbar */}
       <Navbar
         activeView={activeView}
         onViewChange={(v) => {
@@ -115,24 +111,23 @@ export default function App() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         currentLang={currentLang}
-        onSelectLang={(lang) => setCurrentLang(lang)}
+        onSelectLang={handleSelectLang}
         userMode={userMode}
-        onToggleUserMode={() => {
-          const next = userMode === 'artisan' ? 'buyer' : 'artisan';
-          setUserMode(next);
-          if (next === 'buyer' && (activeView === 'dashboard' || activeView === 'add-product')) {
-            setActiveView('marketplace');
-          }
-        }}
+        currentArtisanProfile={currentArtisanProfile}
+        onOpenAuth={() => setShowAuthModal(true)}
         cartCount={inquiryCartCount}
         onOpenCart={() => setShowCartModal(true)}
       />
 
-      {/* Main View Container */}
+      {/* 4. Main Page View Routing */}
       <main style={{ flex: 1 }}>
         {activeView === 'home' && (
           <Home
             onNavigate={(v) => {
+              if ((v === 'dashboard' || v === 'add-product') && userMode !== 'artisan') {
+                setShowAuthModal(true);
+                return;
+              }
               setActiveView(v);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
@@ -165,7 +160,6 @@ export default function App() {
             onBack={() => setActiveView('marketplace')}
             onSelectProduct={handleSelectProduct}
             onSelectMarketMatch={handleSelectMarketMatch}
-            currentLang={currentLang}
           />
         )}
 
@@ -178,7 +172,6 @@ export default function App() {
             }}
             onSelectProduct={handleSelectProduct}
             onSelectMarketMatch={handleSelectMarketMatch}
-            currentLang={currentLang}
           />
         )}
 
@@ -193,40 +186,50 @@ export default function App() {
         {activeView === 'onboarding' && (
           <Onboarding
             currentLang={currentLang}
-            onSelectLang={setCurrentLang}
+            onSelectLang={handleSelectLang}
             onComplete={handleOnboardingComplete}
           />
         )}
       </main>
 
-      {/* Cart / Inquiry Quick Modal */}
+      {/* 5. Dual Persona Login / Signup Auth Modal */}
+      {showAuthModal && (
+        <AuthModal
+          currentLang={currentLang}
+          onClose={() => setShowAuthModal(false)}
+          onLoginArtisan={(profile) => {
+            setCurrentArtisanProfile(profile);
+            setUserMode('artisan');
+            setActiveView('dashboard');
+          }}
+          onSelectBuyerMode={() => {
+            setUserMode('buyer');
+            setActiveView('marketplace');
+          }}
+        />
+      )}
+
+      {/* 6. Order Inquiry Modal */}
       {showCartModal && (
         <OrderModal
           product={selectedProduct || { id: 'prod_1', title: 'Chendamangalam Handwoven Kasavu Saree', final_price: 3950 }}
           artisan={currentArtisanProfile}
           onClose={() => setShowCartModal(false)}
-          currentLang={currentLang}
         />
       )}
 
-      {/* Historic Footer */}
+      {/* 7. Historic Footer */}
       <footer style={styles.footer}>
         <div style={styles.footerInner}>
           <div style={styles.footerBrand}>
-            <div style={styles.footerLogoBadge}>
-              <img
-                src="/brand-logo.png"
-                alt="Taana Baana Logo"
-                style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
-              />
-            </div>
+            <div style={styles.footerLogoBadge}>🧵</div>
             <div>
               <span style={styles.footerTitle}>taana-baana</span>
-              <span style={styles.footerSub}>{t.footerTagline}</span>
+              <span style={styles.footerSub}>From Hands to Markets • Powered by AI</span>
             </div>
           </div>
           <p style={styles.copyright}>
-            {t.footerCopyright}
+            © 2026 Taana Baana. Interlocking tradition with ethical commerce.
           </p>
         </div>
       </footer>

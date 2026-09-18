@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import CameraCaptureModal from '../components/CameraCaptureModal';
 import VoiceRecorder from '../components/VoiceRecorder';
 import PriceSuggestionCard from '../components/PriceSuggestionCard';
 import MarketMatchPanel from '../components/MarketMatchPanel';
 import { generateCraftCatalogWithGemini } from '../lib/geminiApi';
 import { api } from '../lib/supabaseClient';
 import { translations } from '../lib/translations';
-import { Camera, Sparkles, Check, Image as ImageIcon, Wand2, ArrowRight } from 'lucide-react';
+import { Camera, Upload, Sparkles, Check, Wand2, Plus, X, ArrowRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) {
-  const [step, setStep] = useState(1); // 1: Photo & AI, 2: Voice & Story, 3: Pricing, 4: Market Linkage
-  const [imageUrl, setImageUrl] = useState('');
+  const [step, setStep] = useState(1); // 1: Photos & AI, 2: Voice & Story, 3: Pricing, 4: Market Linkage
+  const [photos, setPhotos] = useState([]); // Array of photo data URLs (max 5)
+  const [showCameraModal, setShowCameraModal] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isEnhanced, setIsEnhanced] = useState(false);
 
-  // Form Fields (AI pre-filled or artisan edited)
+  // Form Fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Weaving');
@@ -26,47 +28,44 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
   const [suggestedMin, setSuggestedMin] = useState(3200);
   const [suggestedMax, setSuggestedMax] = useState(4800);
 
+  const fileInputRef = useRef(null);
   const t = translations[currentLang] || translations.en;
 
-  const AI_SAMPLE_PRESETS = [
-    {
-      title: "Chendamangalam Pure Pit-Loom Kasavu Saree",
-      category: "Weaving",
-      description: "Handwoven with 100% organic cotton yarn on traditional wooden pit looms with fine gold zari temple border.",
-      tags: ["Kasavu", "Handloom", "Saree", "Organic Cotton", "Gold Zari"],
-      materialCost: 1100,
-      hours: 16,
-      img: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      title: "Molela Village Hand-Molded Terracotta Votive Pitcher",
-      category: "Pottery",
-      description: "Sculpted from local Molela river clay, wood-ash glazed for natural water cooling and mineral enrichment.",
-      tags: ["Terracotta", "Molela", "Pottery", "Eco-friendly", "Cooling"],
-      materialCost: 300,
-      hours: 6,
-      img: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=800&q=80"
+  const handleAddPhotoUrl = async (imgUrl) => {
+    const updatedPhotos = [...photos, imgUrl].slice(0, 5);
+    setPhotos(updatedPhotos);
+
+    // If first photo added, run Gemini AI analysis pipeline
+    if (updatedPhotos.length === 1 && !title) {
+      setIsAnalyzing(true);
+      const aiResult = await generateCraftCatalogWithGemini({
+        textDescription: description || "Handcrafted Indian artisan product",
+        categoryHint: category
+      });
+
+      setTitle(aiResult.title);
+      setCategory(aiResult.category);
+      setDescription(aiResult.description);
+      setTags(aiResult.tags);
+      setMaterialCost(aiResult.materialCost);
+      setProductionHours(aiResult.hours);
+      setIsAnalyzing(false);
     }
-  ];
+  };
 
-  const handlePhotoSelect = async (presetIndex = 0) => {
-    setIsAnalyzing(true);
-    const selected = AI_SAMPLE_PRESETS[presetIndex];
-    setImageUrl(selected.img);
+  const handleRemovePhoto = (index) => {
+    setPhotos(photos.filter((_, i) => i !== index));
+  };
 
-    // Call Gemini AI analysis service
-    const aiResult = await generateCraftCatalogWithGemini({
-      textDescription: selected.description,
-      categoryHint: selected.category
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        handleAddPhotoUrl(evt.target.result);
+      };
+      reader.readAsDataURL(file);
     });
-
-    setTitle(aiResult.title || selected.title);
-    setCategory(aiResult.category || selected.category);
-    setDescription(aiResult.description || selected.description);
-    setTags(aiResult.tags || selected.tags);
-    setMaterialCost(aiResult.materialCost || selected.materialCost);
-    setProductionHours(aiResult.hours || selected.hours);
-    setIsAnalyzing(false);
   };
 
   const handlePublish = async () => {
@@ -77,7 +76,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
         description: description || "Handmade by traditional Indian artisan.",
         category,
         tags,
-        image_urls: [imageUrl || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'],
+        image_urls: photos.length > 0 ? photos : ['https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'],
         material_cost: materialCost,
         production_hours: productionHours,
         size,
@@ -126,63 +125,109 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
         ))}
       </div>
 
-      {/* STEP 1: Photo Upload + AI Smart Vision */}
+      {/* STEP 1: Multi-Photo Capture (Camera Stream + Upload) & AI */}
       {step === 1 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepPhoto}: {t.step1Heading}</h2>
-          <p style={styles.subtitle}>{t.step1Sub}</p>
+          <h2 style={styles.title}>{t.stepPhoto}: Capture or Upload Craft Photos</h2>
+          <p style={styles.subtitle}>Take live camera photos or upload up to 5 photos of your craft item.</p>
 
-          <div style={styles.uploadArea}>
-            {imageUrl ? (
-              <div style={styles.previewBox}>
+          {/* Two Clear Options: Camera vs Device Upload */}
+          <div style={styles.captureOptionsRow}>
+            <button
+              type="button"
+              onClick={() => setShowCameraModal(true)}
+              className="btn btn-primary btn-large-touch"
+              style={{ flex: 1 }}
+            >
+              <Camera size={22} />
+              <span>Take Photo (Live Camera)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="btn btn-outline btn-large-touch"
+              style={{ flex: 1 }}
+            >
+              <Upload size={22} />
+              <span>Upload from Device</span>
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+            />
+          </div>
+
+          {/* Photo Gallery Grid Preview (Up to 5 Photos) */}
+          <div style={styles.galleryPreviewGrid}>
+            {photos.map((url, i) => (
+              <div key={i} style={styles.photoThumbWrapper}>
                 <img
-                  src={imageUrl}
-                  alt="Product preview"
+                  src={url}
+                  alt={`Craft photo ${i + 1}`}
                   style={{
-                    ...styles.previewImg,
-                    filter: isEnhanced ? 'brightness(1.06) contrast(1.08) saturate(1.12)' : 'none'
+                    ...styles.photoThumb,
+                    filter: isEnhanced ? 'brightness(1.06) contrast(1.08)' : 'none'
                   }}
                 />
+                {i === 0 && <span style={styles.primaryBadge}>Primary Cover</span>}
                 <button
-                  onClick={() => setIsEnhanced(!isEnhanced)}
-                  style={{
-                    ...styles.enhanceBtn,
-                    backgroundColor: isEnhanced ? '#7C8A5A' : '#3B2A1E'
-                  }}
+                  type="button"
+                  onClick={() => handleRemovePhoto(i)}
+                  style={styles.removePhotoBtn}
                 >
-                  <Wand2 size={16} />
-                  <span>{isEnhanced ? t.enhanced : t.autoEnhance}</span>
+                  <X size={14} color="#FFFFFF" />
                 </button>
               </div>
-            ) : (
-              <div style={styles.uploadPlaceholder}>
-                <Camera size={44} color="#C1602C" />
-                <p style={styles.uploadPrompt}>{t.photoUploadPrompt}</p>
-                <div style={styles.presetButtons}>
-                  <button onClick={() => handlePhotoSelect(0)} style={styles.presetBtn}>
-                    {t.demoPhoto1}
-                  </button>
-                  <button onClick={() => handlePhotoSelect(1)} style={styles.presetBtn}>
-                    {t.demoPhoto2}
-                  </button>
-                </div>
-              </div>
+            ))}
+
+            {photos.length < 5 && photos.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowCameraModal(true)}
+                style={styles.addMorePhotoBox}
+              >
+                <Plus size={24} color="#C1602C" />
+                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#C1602C' }}>Add Photo</span>
+              </button>
             )}
           </div>
 
+          {/* AI Analysis & Auto-Enhancement Status */}
           {isAnalyzing && (
             <div style={styles.aiAnalyzingBox}>
-              <Sparkles size={20} color="#D9A441" />
-              <span>{t.aiAnalyzing}</span>
+              <Sparkles size={20} color="#D9A441" className="spin" />
+              <span>Enhancing photo lighting & auto-generating craft details...</span>
             </div>
           )}
 
-          {/* AI Pre-filled Review Fields */}
-          {title && !isAnalyzing && (
+          {photos.length > 0 && (
+            <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setIsEnhanced(!isEnhanced)}
+                style={{
+                  ...styles.enhanceToggleBtn,
+                  backgroundColor: isEnhanced ? '#7C8A5A' : '#3B2A1E'
+                }}
+              >
+                <Wand2 size={16} />
+                <span>{isEnhanced ? 'Enhanced (Lighting & White-Balance Boosted)' : 'Auto-Enhance Photo Background'}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Editable Review Screen */}
+          {photos.length > 0 && !isAnalyzing && (
             <div style={styles.aiResultForm}>
               <div style={styles.aiTagBadge}>
                 <Sparkles size={14} color="#D9A441" />
-                <span>{t.aiGeneratedReview}</span>
+                <span>Gemini AI Generated — Review & Edit Fields</span>
               </div>
 
               <div style={styles.fieldGroup}>
@@ -196,26 +241,27 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
               </div>
 
               <div style={styles.fieldGroup}>
-                <label style={styles.label}>{t.craftCategory}</label>
+                <label style={styles.label}>Craft Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   style={styles.select}
                 >
-                  <option value="Weaving">{t.catWeaving}</option>
-                  <option value="Pottery">{t.catPottery}</option>
-                  <option value="Woodwork">{t.catWoodwork}</option>
-                  <option value="Metalwork">{t.catMetalwork}</option>
-                  <option value="Embroidery">{t.catEmbroidery}</option>
+                  <option value="Weaving">Weaving & Sarees</option>
+                  <option value="Pottery">Pottery & Clay</option>
+                  <option value="Woodwork">Woodwork & Toys</option>
+                  <option value="Metalwork">Dhokra & Metal</option>
+                  <option value="Embroidery">Needlework & Embroidery</option>
                 </select>
               </div>
 
               <button
+                type="button"
                 onClick={() => setStep(2)}
                 className="btn btn-primary btn-large-touch"
                 style={{ width: '100%', marginTop: '16px' }}
               >
-                {t.approveAndProceedVoice}
+                Approve & Proceed to Voice Details ➔
               </button>
             </div>
           )}
@@ -225,8 +271,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 2: Voice & Story Input */}
       {step === 2 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepVoice}: {t.step2Heading}</h2>
-          <p style={styles.subtitle}>{t.step2Sub}</p>
+          <h2 style={styles.title}>{t.stepVoice}: Live Voice Recording</h2>
+          <p style={styles.subtitle}>Speak in Malayalam, Hindi, or English to record your exact voice story.</p>
 
           <VoiceRecorder
             lang={currentLang}
@@ -234,19 +280,19 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           />
 
           <div style={{ ...styles.fieldGroup, marginTop: '20px' }}>
-            <label style={styles.label}>{t.aiDescSuggested || "Product Description"}</label>
+            <label style={styles.label}>{t.aiDescSuggested}</label>
             <textarea
               rows="4"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={t.storyPlaceholder}
+              placeholder="Describe yarn source, weaving technique, or cultural significance..."
               style={styles.textarea}
             />
           </div>
 
           <div style={styles.btnRow}>
-            <button onClick={() => setStep(1)} className="btn btn-outline">{t.back}</button>
-            <button onClick={() => setStep(3)} className="btn btn-primary">{t.proceedPricing}</button>
+            <button onClick={() => setStep(1)} className="btn btn-outline">Back</button>
+            <button onClick={() => setStep(3)} className="btn btn-primary">Proceed to Smart Pricing ➔</button>
           </div>
         </div>
       )}
@@ -254,8 +300,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 3: Smart Pricing Assistant */}
       {step === 3 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepPrice}: {t.step3Heading}</h2>
-          <p style={styles.subtitle}>{t.step3Sub}</p>
+          <h2 style={styles.title}>{t.stepPrice}: AI-Assisted Pricing Assistant</h2>
+          <p style={styles.subtitle}>Ensure fair artisan wages while remaining competitive in target markets.</p>
 
           <PriceSuggestionCard
             materialCost={materialCost}
@@ -269,8 +315,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           />
 
           <div style={{ ...styles.btnRow, marginTop: '24px' }}>
-            <button onClick={() => setStep(2)} className="btn btn-outline">{t.back}</button>
-            <button onClick={() => setStep(4)} className="btn btn-primary">{t.proceedLinkage}</button>
+            <button onClick={() => setStep(2)} className="btn btn-outline">Back</button>
+            <button onClick={() => setStep(4)} className="btn btn-primary">Proceed to Market Linkage Analysis ➔</button>
           </div>
         </div>
       )}
@@ -278,11 +324,10 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 4: AI Market Linkage Engine Preview & Publish */}
       {step === 4 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepMatch}: {t.step4Heading}</h2>
-          <p style={styles.subtitle}>{t.step4Sub}</p>
+          <h2 style={styles.title}>{t.stepMatch}: AI Market Linkage Inspector</h2>
+          <p style={styles.subtitle}>Review recommended market channels before publishing to the marketplace.</p>
 
           <MarketMatchPanel
-            lang={currentLang}
             product={{
               title,
               category,
@@ -295,17 +340,25 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
           />
 
           <div style={{ ...styles.btnRow, marginTop: '24px' }}>
-            <button onClick={() => setStep(3)} className="btn btn-outline">{t.back}</button>
+            <button onClick={() => setStep(3)} className="btn btn-outline">Back</button>
             <button
               onClick={handlePublish}
               className="btn btn-gold btn-large-touch"
               style={{ flex: 1 }}
             >
               <Check size={20} />
-              <span>{t.confirmPublish}</span>
+              <span>Confirm & Publish Craft to Marketplace</span>
             </button>
           </div>
         </div>
+      )}
+
+      {/* Live Web Camera Capture Modal */}
+      {showCameraModal && (
+        <CameraCaptureModal
+          onClose={() => setShowCameraModal(false)}
+          onCapturePhoto={handleAddPhotoUrl}
+        />
       )}
     </div>
   );
@@ -313,7 +366,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
 
 const styles = {
   container: {
-    maxWidth: '820px',
+    maxWidth: '840px',
     margin: '30px auto',
     padding: '0 20px'
   },
@@ -365,62 +418,75 @@ const styles = {
     color: '#6E5B4D',
     marginBottom: '24px'
   },
-  uploadArea: {
-    backgroundColor: '#FAF3E7',
-    border: '2px dashed #E8D9C5',
-    borderRadius: '16px',
-    padding: '24px',
-    textAlign: 'center',
+  captureOptionsRow: {
+    display: 'flex',
+    gap: '14px',
+    marginBottom: '24px',
+    flexWrap: 'wrap'
+  },
+  galleryPreviewGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+    gap: '12px',
     marginBottom: '20px'
   },
-  uploadPlaceholder: {
+  photoThumbWrapper: {
+    position: 'relative',
+    height: '130px',
+    borderRadius: '14px',
+    overflow: 'hidden',
+    border: '2px solid #E8D9C5'
+  },
+  photoThumb: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover'
+  },
+  primaryBadge: {
+    position: 'absolute',
+    bottom: '4px',
+    left: '4px',
+    backgroundColor: '#C1602C',
+    color: '#FFFFFF',
+    fontSize: '0.65rem',
+    fontWeight: '800',
+    padding: '2px 6px',
+    borderRadius: '8px'
+  },
+  removePhotoBtn: {
+    position: 'absolute',
+    top: '4px',
+    right: '4px',
+    backgroundColor: 'rgba(59, 42, 30, 0.75)',
+    border: 'none',
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer'
+  },
+  addMorePhotoBox: {
+    height: '130px',
+    borderRadius: '14px',
+    border: '2px dashed #C1602C',
+    backgroundColor: '#FAF3E7',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '12px'
-  },
-  uploadPrompt: {
-    fontSize: '0.95rem',
-    fontWeight: '600',
-    color: '#3B2A1E'
-  },
-  presetButtons: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '10px',
-    marginTop: '10px'
-  },
-  presetBtn: {
-    backgroundColor: '#FFFFFF',
-    border: '1px solid #C1602C',
-    color: '#C1602C',
-    padding: '8px 16px',
-    borderRadius: '20px',
-    fontWeight: '700',
-    fontSize: '0.85rem',
+    justifyContent: 'center',
+    gap: '6px',
     cursor: 'pointer'
   },
-  previewBox: {
-    position: 'relative',
-    display: 'inline-block'
-  },
-  previewImg: {
-    width: '100%',
-    maxHeight: '340px',
-    objectFit: 'cover',
-    borderRadius: '14px'
-  },
-  enhanceBtn: {
-    position: 'absolute',
-    bottom: '12px',
-    right: '12px',
+  enhanceToggleBtn: {
     color: '#FFFFFF',
     border: 'none',
     padding: '8px 16px',
     borderRadius: '20px',
     fontWeight: '700',
     fontSize: '0.85rem',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
     cursor: 'pointer'
@@ -436,7 +502,7 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '700',
     color: '#3B2A1E',
-    marginBottom: '20px'
+    marginTop: '16px'
   },
   aiResultForm: {
     display: 'flex',
@@ -445,7 +511,8 @@ const styles = {
     backgroundColor: '#F8F3EA',
     padding: '20px',
     borderRadius: '16px',
-    border: '1px solid #E8D9C5'
+    border: '1px solid #E8D9C5',
+    marginTop: '20px'
   },
   aiTagBadge: {
     display: 'inline-flex',

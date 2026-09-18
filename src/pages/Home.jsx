@@ -3,7 +3,7 @@ import ProductCard from '../components/ProductCard';
 import CraftMap from '../components/CraftMap';
 import { api } from '../lib/supabaseClient';
 import { translations } from '../lib/translations';
-import { Sparkles, ArrowRight, ShieldCheck, HeartHandshake, Zap, Award, ShoppingBag, PlusCircle } from 'lucide-react';
+import { Sparkles, ArrowRight, HeartHandshake, Zap, Award, ShoppingBag, PlusCircle } from 'lucide-react';
 
 export default function Home({
   onNavigate,
@@ -15,31 +15,6 @@ export default function Home({
   const [artisansMap, setArtisansMap] = useState(new Map());
   const [selectedRegion, setSelectedRegion] = useState('All Regions');
   const t = translations[currentLang] || translations.en;
-
-  const heroTags = t.heroTags || [
-    '🧵 Pit-loom Handlooms',
-    '🏺 Terracotta Votives',
-    '🪡 Lucknow Chikankari',
-    '🪔 Bastar Dhokra Brass'
-  ];
-
-  const featureCards = [
-    {
-      title: t.featureCardOneTitle,
-      body: t.featureCardOneBody,
-      icon: <Zap size={24} color="#C1602C" />
-    },
-    {
-      title: t.featureCardTwoTitle,
-      body: t.featureCardTwoBody,
-      icon: <Award size={24} color="#D9A441" />
-    },
-    {
-      title: t.featureCardThreeTitle,
-      body: t.featureCardThreeBody,
-      icon: <HeartHandshake size={24} color="#7C8A5A" />
-    }
-  ];
 
   useEffect(() => {
     async function loadData() {
@@ -55,26 +30,25 @@ export default function Home({
 
   return (
     <div style={styles.container}>
-      {/* Hero Section */}
-      <section className="parallax-scene hero-scene" style={styles.heroSection}>
-        <div className="parallax-layer hero-orb hero-orb-one" />
-        <div className="parallax-layer hero-orb hero-orb-two" />
-        <div className="parallax-layer hero-grid" />
-
+      {/* Hero Section — 8px Spacing Scale Polish */}
+      <section style={styles.heroSection}>
+        {/* Badge Pill (Margin-bottom: 16px) */}
         <div style={styles.heroBadge}>
           <Sparkles size={14} color="#D9A441" />
           <span>{t.brandSubtitle}</span>
         </div>
 
+        {/* Headline (Margin-bottom: 16px) */}
         <h1 style={styles.heroTitle}>
           {t.heroTitle}
         </h1>
 
+        {/* Subtext (Margin-bottom: 24px) */}
         <p style={styles.heroSubtitle}>
           {t.heroSubtitle}
         </p>
 
-        {/* Hero CTA Buttons */}
+        {/* Hero CTA Buttons (Margin-bottom: 32px) */}
         <div style={styles.heroCtaGroup}>
           <button
             onClick={() => onNavigate('add-product')}
@@ -93,30 +67,56 @@ export default function Home({
           </button>
         </div>
 
-        {/* Floating Motifs */}
-        <div style={styles.floatingMotifBar}>
-          {heroTags.map((tag, index) => (
-            <div key={index} style={styles.motifItem}>{tag}</div>
-          ))}
+        {/* Grouped Popular Crafts Chips */}
+        <div style={styles.popularCraftsBox}>
+          <span style={styles.popularLabel}>Popular Crafts:</span>
+          <div style={styles.floatingMotifBar}>
+            <div style={styles.motifItem}>🧵 Pit-loom Handlooms</div>
+            <div style={styles.motifItem}>🏺 Terracotta Votives</div>
+            <div style={styles.motifItem}>🪡 Lucknow Chikankari</div>
+            <div style={styles.motifItem}>🪔 Bastar Dhokra Brass</div>
+          </div>
         </div>
       </section>
 
       {/* Signature AI Market Linkage Feature Showcase */}
       <section style={styles.signatureSection}>
         <div style={styles.signatureHeader}>
-          <div style={styles.signatureBadge}>{t.signatureBadge}</div>
+          <div style={styles.signatureBadge}>SIGNATURE INNOVATION</div>
           <h2 style={styles.signatureTitle}>{t.signatureFeatureTitle}</h2>
           <p style={styles.signatureDesc}>{t.signatureFeatureDesc}</p>
         </div>
 
         <div style={styles.featureGrid}>
-          {featureCards.map((card) => (
-            <div key={card.title} className="craft-card" style={styles.featureCard}>
-              <div style={styles.featureIconBox}>{card.icon}</div>
-              <h3 style={styles.featureTitle}>{card.title}</h3>
-              <p style={styles.featureBody}>{card.body}</p>
+          <div className="craft-card" style={styles.featureCard}>
+            <div style={styles.featureIconBox}>
+              <Zap size={24} color="#C1602C" />
             </div>
-          ))}
+            <h3 style={styles.featureTitle}>1. AI Vision & Voice Cataloging</h3>
+            <p style={styles.featureBody}>
+              Artisans simply snap a photo and describe their craft in Malayalam, Hindi, or English. AI automatically extracts heritage story, title, tags, and category.
+            </p>
+          </div>
+
+          <div className="craft-card" style={styles.featureCard}>
+            <div style={styles.featureIconBox}>
+              <Award size={24} color="#D9A441" />
+            </div>
+            <h3 style={styles.featureTitle}>2. Fair Wage Intelligence</h3>
+            <p style={styles.featureBody}>
+              Calculates material inputs and hours worked to guarantee a fair artisan wage floor (₹150+/hr) and recommended market price range.
+            </p>
+          </div>
+
+          <div className="craft-card" style={styles.featureCard}>
+            <div style={styles.featureIconBox}>
+              <HeartHandshake size={24} color="#7C8A5A" />
+            </div>
+            <h3 style={styles.featureTitle}>3. Direct Buyer Matching</h3>
+            <p style={styles.featureBody}>
+              Ranks target buyers (Eco Boutiques, Luxury Decorators, Corporate Gifting) and connects buyers directly to the artisan without middleman commission.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -135,11 +135,11 @@ export default function Home({
       <section style={styles.craftsSection}>
         <div style={styles.craftsHeader}>
           <div>
-            <h2 style={styles.sectionHeading}>{t.authenticCollections}</h2>
-            <p style={styles.sectionSubheading}>{t.liveMarketplaceSubtitle}</p>
+            <h2 style={styles.sectionHeading}>Authentic Artisan Collections</h2>
+            <p style={styles.sectionSubheading}>Direct from weaver pit-looms and village pottery wheels</p>
           </div>
           <button onClick={() => onNavigate('marketplace')} style={styles.seeAllBtn}>
-            <span>{t.viewAllCrafts}</span>
+            <span>View All Crafts</span>
             <ArrowRight size={16} />
           </button>
         </div>
@@ -165,15 +165,13 @@ const styles = {
     paddingBottom: '60px'
   },
   heroSection: {
-    position: 'relative',
-    maxWidth: '1100px',
+    maxWidth: '960px',
     margin: '0 auto',
-    padding: '90px 24px 50px 24px',
+    padding: '48px 24px 32px 24px', // 8px scale
     textAlign: 'center',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    overflow: 'hidden'
+    alignItems: 'center'
   },
   heroBadge: {
     display: 'inline-flex',
@@ -186,50 +184,65 @@ const styles = {
     fontWeight: '700',
     padding: '6px 16px',
     borderRadius: '20px',
-    marginBottom: '20px'
+    marginBottom: '16px' // 16px spacing
   },
   heroTitle: {
-    fontFamily: 'var(--font-heading)',
-    fontSize: 'clamp(2.8rem, 6vw, 5.2rem)',
+    fontFamily: "'Playfair Display', serif",
+    fontSize: '3.2rem',
     color: '#3B2A1E',
-    lineHeight: '0.95',
-    letterSpacing: '-0.04em',
-    marginBottom: '18px',
-    textShadow: '0 12px 28px rgba(59, 42, 30, 0.08)'
+    lineHeight: '1.15',
+    letterSpacing: '-0.02em',
+    marginBottom: '16px' // 16px spacing
   },
   heroSubtitle: {
-    fontSize: '1.08rem',
+    fontSize: '1.15rem',
     color: '#6E5B4D',
-    maxWidth: '760px',
-    lineHeight: '1.75',
-    marginBottom: '32px'
+    maxWidth: '700px',
+    lineHeight: '1.55',
+    marginBottom: '24px' // 24px spacing
   },
   heroCtaGroup: {
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'center',
     gap: '16px',
-    marginBottom: '40px'
+    marginBottom: '32px' // 32px spacing
+  },
+  popularCraftsBox: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(8px)',
+    padding: '8px 20px',
+    borderRadius: '24px',
+    border: '1px solid #E8D9C5'
+  },
+  popularLabel: {
+    fontSize: '0.8rem',
+    fontWeight: '800',
+    color: '#C1602C',
+    letterSpacing: '0.04em'
   },
   floatingMotifBar: {
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '12px',
-    justifyContent: 'center'
+    gap: '8px'
   },
   motifItem: {
     backgroundColor: '#FFFFFF',
     border: '1px solid #E8D9C5',
-    borderRadius: '20px',
-    padding: '6px 16px',
-    fontSize: '0.85rem',
+    borderRadius: '16px',
+    padding: '4px 12px',
+    fontSize: '0.82rem',
     fontWeight: '600',
-    color: '#3B2A1E',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+    color: '#3B2A1E'
   },
   signatureSection: {
     maxWidth: '1240px',
-    margin: '0 auto 60px auto',
+    margin: '0 auto 48px auto',
     padding: '40px 24px',
     backgroundColor: '#FAF3E7',
     borderRadius: '24px',
@@ -237,7 +250,7 @@ const styles = {
   },
   signatureHeader: {
     textAlign: 'center',
-    marginBottom: '36px'
+    marginBottom: '32px'
   },
   signatureBadge: {
     fontSize: '0.75rem',
@@ -296,7 +309,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginBottom: '28px'
+    marginBottom: '24px'
   },
   sectionHeading: {
     fontFamily: "'Playfair Display', serif",
