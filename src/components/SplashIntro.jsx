@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import TaanaBaanaLogo from './TaanaBaanaLogo';
 import { translations } from '../lib/translations';
 
 export default function SplashIntro({ onComplete, lang = 'en' }) {
@@ -7,7 +8,7 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
   const t = translations[lang] || translations.en;
 
   useEffect(() => {
-    // Check if intro was already seen in this browser session
+    // Check if intro was already seen in this session
     const seen = sessionStorage.getItem('taana_intro_seen');
     if (seen === 'true') {
       setIsVisible(false);
@@ -17,9 +18,7 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
 
     const timer1 = setTimeout(() => setPhase(2), 1000);
     const timer2 = setTimeout(() => setPhase(3), 2200);
-    const timer3 = setTimeout(() => {
-      handleFinish();
-    }, 3800);
+    const timer3 = setTimeout(() => handleFinish(), 3800);
 
     return () => {
       clearTimeout(timer1);
@@ -60,7 +59,7 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
               <stop offset="0%" stopColor="#5C6B73" />
               <stop offset="100%" stopColor="#788892" />
             </linearGradient>
-            
+
             {/* Madhubani Temple Border Pattern */}
             <pattern id="templePattern" width="40" height="20" patternUnits="userSpaceOnUse">
               <path d="M 0,20 L 20,0 L 40,20 Z" fill="none" stroke="#C1602C" strokeWidth="1.5" opacity="0.3" />
@@ -73,16 +72,14 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
 
           {/* Warli Art Background Line Drawings */}
           <g opacity={phase >= 2 ? "0.25" : "0"} style={{ transition: 'opacity 1s ease' }}>
-            {/* Warli Dancers Circle */}
             <circle cx="400" cy="300" r="160" fill="none" stroke="#3B2A1E" strokeWidth="1" strokeDasharray="4 4" />
-            {/* Stylized Sun Motif */}
             <circle cx="400" cy="300" r="25" fill="none" stroke="#D9A441" strokeWidth="2" />
             {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-              <line 
-                key={i} 
-                x1={400 + 25 * Math.cos((angle * Math.PI) / 180)} 
+              <line
+                key={i}
+                x1={400 + 25 * Math.cos((angle * Math.PI) / 180)}
                 y1={300 + 25 * Math.sin((angle * Math.PI) / 180)}
-                x2={400 + 40 * Math.cos((angle * Math.PI) / 180)} 
+                x2={400 + 40 * Math.cos((angle * Math.PI) / 180)}
                 y2={300 + 40 * Math.sin((angle * Math.PI) / 180)}
                 stroke="#D9A441"
                 strokeWidth="2"
@@ -90,9 +87,8 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
             ))}
           </g>
 
-          {/* Interlocking Weaving Thread Paths (Warp & Weft Animation) */}
+          {/* Interlocking Weaving Thread Paths */}
           <g>
-            {/* Horizontal Threads (Warp) */}
             <path
               d="M 50 300 Q 200 240, 400 300 T 750 300"
               fill="none"
@@ -111,8 +107,6 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
               strokeDashoffset={phase === 1 ? "500" : "0"}
               style={{ transition: 'stroke-dashoffset 2.0s cubic-bezier(0.4, 0, 0.2, 1)' }}
             />
-            
-            {/* Vertical Crossing Threads (Weft) */}
             <path
               d="M 400 100 Q 340 200, 400 300 T 400 500"
               fill="none"
@@ -122,37 +116,16 @@ export default function SplashIntro({ onComplete, lang = 'en' }) {
               strokeDashoffset={phase === 1 ? "400" : "0"}
               style={{ transition: 'stroke-dashoffset 1.6s cubic-bezier(0.4, 0, 0.2, 1)' }}
             />
-            
-            {/* Logo Infinity Ribbon Loop */}
-            <path
-              d="M 370 280 C 340 250, 340 330, 400 300 C 460 270, 460 350, 430 320"
-              fill="none"
-              stroke="#D9A441"
-              strokeWidth="4"
-              strokeLinecap="round"
-              opacity={phase >= 2 ? "1" : "0"}
-              style={{ transition: 'opacity 0.8s ease' }}
-            />
           </g>
         </svg>
 
-        {/* Center Logo & Tagline Settle */}
+        {/* Center Logo Settle */}
         <div style={{
           ...styles.logoContainer,
           opacity: phase >= 2 ? 1 : 0,
-          transform: phase === 3 ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(12px)'
+          transform: phase === 3 ? 'scale(1) translateY(0)' : 'scale(0.85) translateY(16px)'
         }}>
-          <div style={styles.ribbonBadge}>
-            <span style={{ color: '#C1602C' }}>t</span>
-            <span style={styles.ribbonIcon}>🧵</span>
-            <span style={{ color: '#7C8A5A' }}>b</span>
-          </div>
-          <h1 style={styles.brandTitle}>taana-baana</h1>
-          <div style={styles.taglineBadge}>
-            <span style={styles.goldDot}>✦</span>
-            <span>{t.tagline || 'From Hands to Markets.'}</span>
-            <span style={styles.goldDot}>✦</span>
-          </div>
+          <TaanaBaanaLogo size="xl" showTagline={true} />
           <p style={styles.subtitleText}>{t.splashSubtitle}</p>
         </div>
       </div>
@@ -194,7 +167,7 @@ const styles = {
   canvasContainer: {
     position: 'relative',
     width: '100%',
-    maxWidth: '700px',
+    maxWidth: '750px',
     height: '500px',
     display: 'flex',
     alignItems: 'center',
@@ -218,53 +191,11 @@ const styles = {
     alignItems: 'center',
     padding: '0 20px'
   },
-  ribbonBadge: {
-    fontSize: '2rem',
-    fontFamily: "'Playfair Display', serif",
-    fontWeight: '800',
-    letterSpacing: '0.1em',
-    marginBottom: '8px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: '#FFFFFF',
-    padding: '6px 20px',
-    borderRadius: '30px',
-    boxShadow: '0 4px 16px rgba(59, 42, 30, 0.08)',
-    border: '1px solid #E8D9C5'
-  },
-  ribbonIcon: {
-    fontSize: '1.4rem',
-    transform: 'rotate(-10deg)',
-    display: 'inline-block'
-  },
-  brandTitle: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: '3.2rem',
-    color: '#3B2A1E',
-    letterSpacing: '-0.02em',
-    fontWeight: '800',
-    lineHeight: '1.1',
-    margin: '4px 0'
-  },
-  taglineBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    color: '#C1602C',
-    fontWeight: '700',
-    fontSize: '1.05rem',
-    letterSpacing: '0.05em',
-    marginTop: '6px'
-  },
-  goldDot: {
-    color: '#D9A441',
-    fontSize: '0.9rem'
-  },
   subtitleText: {
     color: '#6E5B4D',
-    fontSize: '0.95rem',
-    marginTop: '12px',
-    maxWidth: '380px'
+    fontSize: '1rem',
+    marginTop: '16px',
+    maxWidth: '420px',
+    lineHeight: '1.5'
   }
 };

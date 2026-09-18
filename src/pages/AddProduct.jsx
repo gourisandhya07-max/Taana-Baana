@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import VoiceRecorder from '../components/VoiceRecorder';
 import PriceSuggestionCard from '../components/PriceSuggestionCard';
 import MarketMatchPanel from '../components/MarketMatchPanel';
+import { generateCraftCatalogWithGemini } from '../lib/geminiApi';
 import { api } from '../lib/supabaseClient';
 import { translations } from '../lib/translations';
 import { Camera, Sparkles, Check, Image as ImageIcon, Wand2, ArrowRight } from 'lucide-react';
@@ -24,10 +25,9 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
   const [finalPrice, setFinalPrice] = useState(3800);
   const [suggestedMin, setSuggestedMin] = useState(3200);
   const [suggestedMax, setSuggestedMax] = useState(4800);
-  
+
   const t = translations[currentLang] || translations.en;
 
-  // Sample AI Presets for photo upload demo
   const AI_SAMPLE_PRESETS = [
     {
       title: "Chendamangalam Pure Pit-Loom Kasavu Saree",
@@ -49,20 +49,24 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
     }
   ];
 
-  const handlePhotoSelect = (presetIndex = 0) => {
+  const handlePhotoSelect = async (presetIndex = 0) => {
     setIsAnalyzing(true);
     const selected = AI_SAMPLE_PRESETS[presetIndex];
     setImageUrl(selected.img);
 
-    setTimeout(() => {
-      setTitle(selected.title);
-      setCategory(selected.category);
-      setDescription(selected.description);
-      setTags(selected.tags);
-      setMaterialCost(selected.materialCost);
-      setProductionHours(selected.hours);
-      setIsAnalyzing(false);
-    }, 1200);
+    // Call Gemini AI analysis service
+    const aiResult = await generateCraftCatalogWithGemini({
+      textDescription: selected.description,
+      categoryHint: selected.category
+    });
+
+    setTitle(aiResult.title || selected.title);
+    setCategory(aiResult.category || selected.category);
+    setDescription(aiResult.description || selected.description);
+    setTags(aiResult.tags || selected.tags);
+    setMaterialCost(aiResult.materialCost || selected.materialCost);
+    setProductionHours(aiResult.hours || selected.hours);
+    setIsAnalyzing(false);
   };
 
   const handlePublish = async () => {
@@ -126,7 +130,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {step === 1 && (
         <div style={styles.card}>
           <h2 style={styles.title}>{t.stepPhoto}: Smart AI Photo Analysis</h2>
-          <p style={styles.subtitle}>Upload a photo of your craft. AI will auto-detect category, pattern, and title.</p>
+          <p style={styles.subtitle}>Upload a photo of your craft. Gemini AI will auto-detect category, pattern, and title.</p>
 
           <div style={styles.uploadArea}>
             {imageUrl ? (
@@ -136,7 +140,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
                   alt="Product preview"
                   style={{
                     ...styles.previewImg,
-                    filter: isEnhanced ? 'brightness(1.05) contrast(1.08) saturate(1.1)' : 'none'
+                    filter: isEnhanced ? 'brightness(1.06) contrast(1.08) saturate(1.12)' : 'none'
                   }}
                 />
                 <button
@@ -168,8 +172,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
 
           {isAnalyzing && (
             <div style={styles.aiAnalyzingBox}>
-              <Sparkles className="spin" size={20} color="#D9A441" />
-              <span>{t.aiAnalysisRunning}</span>
+              <Sparkles size={20} color="#D9A441" />
+              <span>Gemini AI is analyzing craft pattern, yarn quality, and origin...</span>
             </div>
           )}
 
@@ -178,7 +182,7 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
             <div style={styles.aiResultForm}>
               <div style={styles.aiTagBadge}>
                 <Sparkles size={14} color="#D9A441" />
-                <span>AI Generated — Review & Edit</span>
+                <span>Gemini AI Generated — Review & Edit</span>
               </div>
 
               <div style={styles.fieldGroup}>
@@ -221,8 +225,8 @@ export default function AddProduct({ artisan, onComplete, currentLang = 'en' }) 
       {/* STEP 2: Voice & Story Input */}
       {step === 2 && (
         <div style={styles.card}>
-          <h2 style={styles.title}>{t.stepVoice}: Voice Description & Story</h2>
-          <p style={styles.subtitle}>Speak in Malayalam, Hindi, or English to add your craft backstory.</p>
+          <h2 style={styles.title}>{t.stepVoice}: Live Voice Recording</h2>
+          <p style={styles.subtitle}>Speak in Malayalam, Hindi, or English to record your exact voice story.</p>
 
           <VoiceRecorder
             lang={currentLang}
